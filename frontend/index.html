@@ -1,8 +1,39 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <link rel='stylesheet' type='text/css' href='style.css'>
+    <script type='text/javascript' src='jquery.js'></script>
+    <script type='text/javascript' src='stuff.js'></script>
   </head>
   <body>
-    <h1>Hello World!</h1>
+    <div id='header'>
+      <h1>lolololol</h1>
+    </div>
+    <button id='compile-btn'>Compile</button></br>
+    <div class='class-panel'>
+      class <input type='text' name='class-name' value='Example'> {<br/>
+      <textarea class='fields' rows=5 cols=68>
+// instance variables
+      </textarea>
+      <br/>
+      <div class='method-panel'>
+        public void <input type='text' name='method-name' size=10 value='example'>(){
+        <br/>
+        <textarea class='method' rows=5 cols=64>
+// TODO your code here
+        </textarea>
+        <br/>
+        }
+      </div>
+      <br/>
+      <button id='add-method-btn'>Add method</button><br/>
+      }
+    </div>
+
+    <div class='interpreter-panel'>
+      <textarea>
+cool
+      </textarea>
+    </div>
   </body>
 </html>

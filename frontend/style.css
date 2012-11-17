@@ -1,0 +1,9 @@
+div.class-panel {
+    position:relative;
+}
+
+div.method-panel, textarea, #add-method-btn{
+    position:relative;
+    left:2em;
+}
+
