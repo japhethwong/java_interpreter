@@ -112,6 +112,7 @@ def tokenize_one_expression(str):
         spaced = spaced.replace(key, ' ' + key + ' ').replace(val, ' ' + val + ' ')
     for item in SPACE:
         spaced = spaced.replace(item, ' ' + item + ' ')
+        spaced = re.sub("\s*=  =\s*", " == ", re.sub("\s*>  =\s*"," >= ",re.sub("\s*<  =\s*"," <= ", spaced)))
     return spaced.strip().split()
 
 class Expression:
@@ -638,17 +639,16 @@ def handle_for(block, instance_vars, stack):
     tokens = clean_up_list_elems(flatten_list(list(map(lambda x: re.split("\)\s*\{", x), tokens))))
     tokens = clean_up_list_elems(flatten_list(list(map(lambda x: re.split("\}", x), tokens))))
     
-    print("tokens: " + str(tokens))
     tokens = tokens[0].split(";") + [tokens[1]]
-    print("tokens: " + str(tokens))
     initialize, condition, update, statements = tokens
-    print("tokens: " + str(tokens))
     
     assign_variable(initialize, instance_vars, stack)
+    """
     evaluated_condition = evaluate_expression(condition, instance_vars, stack)
     if type(evaluated_condition) is not bool:
         raise InvalidForLoopException("Boolean condition is of wrong type")
-    while evaluated_condition:
+    """
+    while evaluate_expression(condition, instance_vars, stack):
         parse_eval(statements, instance_vars, stack)
         assign_variable(update, instance_vars, stack)
         
