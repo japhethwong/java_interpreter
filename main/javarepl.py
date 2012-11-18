@@ -102,11 +102,11 @@ def evaluate_expression(exp_str, instance_environment, exp_stack):
     if "/"  in exp_str and (re.search('\d+\.\d+', exp_str) is None):
         exp_str = exp_str.replace('/', '//')  
     
-    
+    if exp_str.strip() == '':
+        return None
     return eval(exp_str)
     
 def tokenize_one_expression(str):
-    memory.append(str)
     spaced = str
     for key, val in DELIMITERS.items():
         spaced = spaced.replace(key, ' ' + key + ' ').replace(val, ' ' + val + ' ')
@@ -172,7 +172,7 @@ def tokenize(cur_read):
     global unevaled, continue_prompt
     s = cur_read.strip() 
     
-    expressions = (unevaled + ' ' + s)
+    expressions = unevaled + ' ' + s
     for item in CONTINUE_KEYWORDS:
         if item in expressions:
             continue_prompt = True
@@ -186,15 +186,23 @@ def tokenize(cur_read):
         exp_lst = []
     else:
         # handle multiple expressions on one line
-        exp_lst = cur_read.split(';')
-        unevaled = exp_lst.pop()   
+        exp_lst = expressions.split(';')
+        unevaled = exp_lst.pop()
 
     # expressions!
     for i, str in enumerate(exp_lst):
         exp_lst[i] = str
         
-    return exp_lst
+    return remove_empty(exp_lst)
     
+def remove_empty(ls):
+    w = len(ls) - 1
+    while w >= 0:
+        if ls[w] == '':
+            ls.pop(w)
+        w = w - 1
+    return ls
+        
     
 def analyze(lst, env=None, s=None):
     expressions = []
