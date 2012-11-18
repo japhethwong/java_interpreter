@@ -3,7 +3,7 @@ import re
 from constants import *
 from variable import *
 from assign import *
-from compile_eval import *
+#from compile_eval import *
 
 try:
     import readline  # Enables access to previous expressions in the REPL
@@ -47,7 +47,7 @@ def handle_constructor(exp_str):
         raise InvalidConstructorException("')' in wrong place")
         
     stack.append(dict())
-    thing = initialize(tokens.pop(0), len(tokens))
+    #thing = initialize(tokens.pop(0), len(tokens))
     
     #handle params
     for param in thing['args']:
@@ -63,7 +63,7 @@ def handle_constructor(exp_str):
 
 def evaluate_expression(exp_str, environment=False):
     #print('here!, string is: ', exp_str)
-    
+    print('HERE')
     # replace all variables with their values
     if (re.search('[a-z]', exp_str)): # match potential variable names
         tokens = tokenize_one_expression(exp_str)
@@ -86,14 +86,12 @@ def evaluate_expression(exp_str, environment=False):
         new_str = re.sub(floatdouble_casting, '', exp_str)
         # make sure division works
         exp_str = str(float(eval(new_str)))
-        print("THHISSS")
     if '//' in exp_str:
         raise SyntaxError("// is invalid")
     if "/"  in exp_str and (re.search('\d+\.\d+', exp_str) is None):
         exp_str = exp_str.replace('/', '//')  
     
     
-        
     return eval(exp_str)
     
 def tokenize_one_expression(str):
@@ -119,6 +117,12 @@ class Expression:
             self.value = assign_variable(self.str, self.env, stack)
         elif len(tokens) == 2 and tokens[0] in TYPES:
             self.value = declare_variable(self.str, self.env, stack)
+        elif 'for' in self.str:
+            self.value = handle_for(self.str, self.env, stack)
+        elif 'while' in self.str:
+            self. value = handle_while(self.str, self.env, stack)
+        elif 'if' in self.str:
+            self.value = parse_eval(handle_conditional(self.str), self.env)
         else:
             self.value = evaluate_expression(self.str)            
             
@@ -137,22 +141,32 @@ def parse(str, env=None):
     return analyze(tokens, env) # is a list of analyzed expressions
     
 def tokenize(cur_read):
-    global unevaled
+    global unevaled, continue_prompt
     s = cur_read.strip() 
     
     expressions = (unevaled + ' ' + s)
-    if continue_prompt:
-        return handle_partials(expressions)        
+    for item in CONTINUE_KEYWORDS:
+        if item in expressions:
+            continue_prompt = True
+    
+    if continue_prompt and cur_read == '':
+        continue_prompt = False
+        unevaled = ''
+        exp_lst = [expressions]
+    elif continue_prompt:
+        unevaled = expressions
+        exp_lst = []
     else:
         # handle multiple expressions on one line
-        expressions = cur_read.split(';')
-        unevaled = expressions.pop()   
+        exp_lst = cur_read.split(';')
+        unevaled = exp_lst.pop()   
 
     # expressions!
-    for i, str in enumerate(expressions):
-        expressions[i] = str
+    for i, str in enumerate(exp_lst):
+        exp_lst[i] = str
         
-    return expressions
+    return exp_lst
+    
     
 def analyze(lst, env=None):
     expressions = []
@@ -180,15 +194,15 @@ def handle_println(exp_str):
     thing_to_eval = thing_to_eval[:-1]
     print(Expression(thing_to_eval).eval())
 
-def parse_eval(strg):
-    return eval_commands(parse(strg))
+def parse_eval(strg, env = None):
+    return eval_commands(parse(strg, env))
     
 def read_eval_print_loop():
     """Run a read-eval-print loop for JavaInterpreter."""
     while True:
         try:
             parse_eval(input(prompt_types[continue_prompt]))
-        except (JavaException, SyntaxError, TypeError, ZeroDivisionError) as err:
+        except (JavaException) as er:#, SyntaxError, TypeError, ZeroDivisionError) as err:
             print(type(err).__name__ + ':', err)
         except (KeyboardInterrupt, EOFError):  # <Control>-D, etc.
             print('<(^ ^)>')
