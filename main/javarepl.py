@@ -652,6 +652,10 @@ def handle_for(block, instance_vars, stack):
         parse_eval(statements, instance_vars, stack)
         assign_variable(update, instance_vars, stack)
         
+    # Assumes well-formed expression.
+    var_name = initialize.split(" ")[1]
+    get_variable_frame(var_name, instance_vars, stack).pop(var_name)
+    
     return
     
 def validate_for_loop_syntax(block):
