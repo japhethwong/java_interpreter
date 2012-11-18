@@ -53,7 +53,13 @@ def handle_conditional_statements(if_else_block):
             return statements_list[index]
         
     return None
-
+"""
+# For testing purposes only.
+def evaluate_expression(condition):
+    print("Evaluating " + str(condition))
+    x, y, z = 0, 0, 0
+    return eval(condition)
+"""
 """
 verify_if_else_syntax() takes an if-else block and scans it to ensure that it is a 
 valid if-else block.  Only verifies general format; does NOT check to ensure that 

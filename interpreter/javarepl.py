@@ -3,7 +3,8 @@ import re
 from constants import *
 from variable import *
 from assign import *
-#from compile_eval import *
+from compile_eval import *
+from exceptions import *
 
 try:
     import readline  # Enables access to previous expressions in the REPL
