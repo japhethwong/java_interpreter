@@ -109,13 +109,22 @@ def evaluate_expression(exp_str, instance_environment, exp_stack):
     return eval(exp_str)
     
 def tokenize_one_expression(str):
+    match_string = '".*"'
+    replaced = ''
+    while re.search(match_string, str):
+        replaced = re.search(match_string, str)
+        str = re.sub(match_string, THING_TO_REPLACE, str)
     spaced = str
     for key, val in DELIMITERS.items():
         spaced = spaced.replace(key, ' ' + key + ' ').replace(val, ' ' + val + ' ')
     for item in SPACE:
         spaced = spaced.replace(item, ' ' + item + ' ')
         spaced = re.sub("\s*! =\s*", " != ", re.sub("\s*=  =\s*", " == ", re.sub("\s*>  =\s*"," >= ",re.sub("\s*<  =\s*"," <= ", spaced))))
-    return spaced.strip().split()
+    tokenized = spaced.strip().split()
+    for i, item in enumerate(tokenized):
+        if item  ==  THING_TO_REPLACE:
+            tokenized[i] = replaced.string
+    return tokenized
 
 class Expression:
     def __init__(self, str=None, env=None, s=None):
