@@ -52,7 +52,7 @@ def handle_conditional_statements(if_else_block, instance_vars, stack):
     
     # Check the conditions; if True, return the associated statements
     for index in range(0, len(conditions_list)):
-        curr_condition = javarepl.evaluate_expression(conditions_list[index])
+        curr_condition = javarepl.evaluate_expression(conditions_list[index], instance_vars, stack)
         if type(curr_condition) is not bool:
             raise InvalidIfElseBlockException("Condition parsed was not a boolean expression.  Condition was: " + str(curr_condition))
         if curr_condition:

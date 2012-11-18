@@ -149,7 +149,7 @@ def update_variable(statement, instance_vars, stack, just_declared=False):
         raise InvalidAssignmentException("")
     
     # Compute the result to update the value of expression with.
-    result = evaluate_expression(variable_value)
+    result = evaluate_expression(variable_value, instance_vars, stack)
     result_type = type(result)
     stored_variable_type = variable_frame[variable_name].get_datatype()
     stored_variable_value = variable_frame[variable_name].get_value()
