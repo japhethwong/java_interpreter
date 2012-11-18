@@ -6,14 +6,18 @@ def tokenize(src):
     """Tokenizes an input string.
 
     >>> tokenize("class Ex { int x = 4; }")
-    ['class', 'Ex', '{', 'int' x', '=', '4', ';', '}']
+    ['class', 'Ex', '{', 'int', 'x', '=', '4', ';', '}']
+    >>> tokenize("int x() {}")
+    ['int', 'x', '(', ')', '{', '}']
     """
 
-    src.replace("{", " { ")
-    src.replace("}", " } ")
-    src.replace("(", " ) ")
-    src.replace("=", " = ")
-    src.replace(";", " ; ")
+    src = src.replace("{", " { ")
+    src = src.replace("}", " } ")
+    src = src.replace("(", " ( ")
+    src = src.replace(")", " ) ")
+    src = src.replace("=", " = ")
+    src = src.replace(";", " ; ")
+    src = src.replace(",", " , ")
     return src.split()
 
 modifiers = ('public', 'protected', 'private')
@@ -65,16 +69,9 @@ def read_statement(tokens):
         {'op': 'assign', 'name': string, 'value': TODO}
     - Method Declaration:
         {'op': 'method', 'name': string, 'type': string, 
-         'args': list of strings, 'body': TODO}
+         'args': list of pairs, 'body': TODO}
 
-    >>> read_statement(tokenize('class Ex {}'))
-    {'op': 'class', 'name': 'Ex', 'body': []}
-    >>> read_statement(tokenize('int x;'))
-    {'op': 'declare', 'name': 'x', 'type': 'int'} 
-    >>> read_statement(tokenize('x = 4;'))
-    {'op': 'assign', 'name': 'x', 'value': '4'} 
-    >>> read_statement(tokenize('int foo() {}'))
-    {'op': 'method', 'name': 'foo', 'type': 'int', 'args': [], 'body': None} 
+    >>> test_read_statement()
     """
     val = tokens.pop(0)
     if val in modifiers:
@@ -83,39 +80,105 @@ def read_statement(tokens):
         return read_class(tokens)
     elif tokens[0] == '=':
         # val is a field name
+        tokens.pop(0)
         return read_assign(val, tokens)
-    elif tokens[0] == '(':
-        # val is a method name
-        return read_method(val, tokens)
     else:
         # val is a type
         return read_declare(val, tokens)
 
 def read_class(tokens):
+    """Reads a complete class expression."""
     name = tokens.pop(0)
     validate_name(name)
     if tokens[0] != '{':
         raise SyntaxError('expected {')
     tokens.pop(0)
-    exp = cur = Pair('class', Pair(name, nil))
+    exp = []
     while tokens and tokens[0] != '}':
-        cur.second = Pair(read_statement(tokens), nil)
-        cur = cur.second
+        exp.append(read_statement(tokens))
+        print(tokens)
     if not tokens:
         raise SyntaxError('expected }')
     else:
-        return cur
+        tokens.pop(0)
+        return {'op': 'class', 'name': name, 'body': exp}
+
+def read_declare(datatype, tokens):
+    name = tokens.pop(0)
+    validate_name(name)
+    if tokens[0] == ';':
+        tokens.pop(0)
+    elif tokens[0] == '=':
+        tokens.insert(0, name)
+    elif tokens[0] == '(':
+        tokens.pop(0)
+        return read_method(name, datatype, tokens)
+    return {'op': 'declare', 'name': name, 'type': datatype}
 
 def read_assign(name, tokens):
-    validate_identifier(name)
-    return Pair('assign var', read_exp(tokens))
+    value = ''
+    while tokens[0] != ';':
+        value += tokens.pop(0)
+    tokens.pop(0)
+    return {'op': 'assign', 'name': name, 'value': value}
 
+def read_method(name, datatype, tokens):
+    args = []
+    if tokens[0] != ')':
+        validate_name(tokens[0])
+        validate_name(tokens[1])
+        args.append((tokens.pop(0), tokens.pop(0)))
+    while tokens[0] == ',':
+        tokens.pop(0)
+        validate_name(tokens[0])
+        validate_name(tokens[1])
+        args.append((tokens.pop(0), tokens.pop(0)))
+    if tokens[0] != ')' or tokens[1] != '{':
+        raise SyntaxError("method declaration is invalid")
+    tokens.pop(0); tokens.pop(0)
 
+    body, parens = '', 1
+    while parens:
+        val = tokens.pop(0)
+        if val == '{':
+            parens += 1
+        elif val == '}':
+            parens -= 1
+        body += val
+    body = body[:-1]
+    return {'op': 'method', 'name': name, 'type': datatype,
+            'args': args, 'body': body}
 
 def repl():
     while True:
         line = input("> ")
-        print(read_statement(tokenize(line)))
+        statements, line = [], tokenize(line)
+        while line:
+            statements.append(read_statement(line))
+        print(statements)
 
 if __name__ == '__main__':
     repl()
+
+def test_read_statement():
+    test1 = read_statement(tokenize('class Ex {}'))
+    assert test1['op'] == 'class', 'test1 failed'
+    assert test1['name'] == 'Ex', 'test1 failed'
+    assert test1['body'] == [], 'test1 failed'
+
+    test2 = read_statement(tokenize('int x;'))
+    assert test2['op'] ==  'declare', 'test2 failed'
+    assert test2['name'] == 'x', 'test2 failed'
+    assert test2['type'] == 'int', 'test2 failed'
+
+    test3 = read_statement(tokenize('x = 4;'))
+    assert test3['op'] == 'assign', 'test3 failed'
+    assert test3['name'] == 'x', 'test3 failed'
+    assert test3['value'] == '4', 'test3 failed'
+
+    test4 = read_statement(tokenize('int foo() {}'))
+    assert test4['op'] == 'method', 'test4 failed'
+    assert test4['name'] == 'foo', 'test4 failed'
+    assert test4['args'] == [], 'test4 failed'
+    assert test4['body'] == '', 'test4 failed'
+
