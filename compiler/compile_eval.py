@@ -1,7 +1,8 @@
 #! usr/bin/python3
 
 from compile_parse import *
-        
+from variable import *
+from javarepl import parse_eval
 ### INTERFACE METHODS ####
 
 def initialize(cls_name, num_args):
@@ -40,7 +41,16 @@ def get_const_body(const):
     """
     return const[1]
 
+
 CLASSES = {} # {class_name : class}
+
+
+def reset_classes():
+    """
+    Function helps reset the dictionary of classes
+    """
+    global CLASSES
+    CLASSES = {}
 
 class InternalClass(object):
 
@@ -186,14 +196,14 @@ class ExternalClass(object):
     def _process_instance_attr(self, cls): #TODO Check datatype
         for var in cls.instance_attr:
             typ = cls.instance_attr[var][0]
-            val = cls.instance_attr[var][1]      # parse_eval(cls.instance_attr[var][1])
-            self.instance_attr[var] = (val, typ,var)          #Variable(val, typ, var)
+            val = parse_eval(cls.instance_attr[var][1])
+            self.instance_attr[var] = Variable(val, typ, var)
 
     def _process_static_attr(self, cls): #TODO
         for var in cls.static_attr:
             typ = cls.static_attr[var][0]
-            val = cls.static_attr[var][1]#parse_eval(cls.static_attr[var][1])
-            self.static_attr[var] = (val, typ, var)        #Variable(val, typ, var)
+            val = parse_eval(cls.static_attr[var][1])
+            self.static_attr[var] = Variable(val, typ, var)
 
     def _process_methods(self, cls): #TODO
         for method in cls.methods:
@@ -213,7 +223,19 @@ if __name__ == '__main__':
     for c in input1:
         ic = InternalClass(c)
     print('Read_line: \n {} \n'.format(input1))
+    for cls in CLASSES.values():
+        cls.print_fields() 
+    print('Processing to InternalClass now:')
+    ic = ExternalClass(CLASSES.values()[0])
+    ic.print_fields()
+
+    reset_classes()
     print(CLASSES)
+    code2 = 'class HelloWorld { public HelloWorld(String s, float y) { s = "hello"; y = 10.1; } void hello(){s;} double num(int x) { return x*y;}}'
+    input2 = read_line(code2)
+    for c in input2:
+        ic = InternalClass(c)
+    print('Read_line: \n {} \n'.format(input2))
     for cls in CLASSES.values():
         cls.print_fields() 
     print('Processing to InternalClass now:')
