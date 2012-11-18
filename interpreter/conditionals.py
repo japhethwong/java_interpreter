@@ -23,7 +23,7 @@ Returns:
 The statements associated with the correct branch, or None if none of the conditions are met
 
 Exceptions Raised:
-InvalidIfElseBlock -- raised if the syntax is invalid for an if-else block.
+InvalidIfElseBlockException -- raised if the syntax is invalid for an if-else block.
 """
 def handle_conditional_statements(if_else_block):
     has_else_clause = verify_if_else_syntax(if_else_block)
@@ -49,7 +49,10 @@ def handle_conditional_statements(if_else_block):
     
     # Check the conditions; if True, return the associated statements
     for index in range(0, len(conditions_list)):
-        if evaluate_expression(conditions_list[index]):
+        curr_condition = evaluate_expression(conditions_list[index])
+        if type(curr_condition) is not bool:
+            raise InvalidIfElseBlockException("Condition parsed was not a boolean expression.  Condition was: " + str(curr_condition))
+        if curr_condition:
             return statements_list[index]
         
     return None
