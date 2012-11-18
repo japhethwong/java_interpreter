@@ -112,7 +112,7 @@ def tokenize_one_expression(str):
         spaced = spaced.replace(key, ' ' + key + ' ').replace(val, ' ' + val + ' ')
     for item in SPACE:
         spaced = spaced.replace(item, ' ' + item + ' ')
-        spaced = re.sub("\s*=  =\s*", " == ", re.sub("\s*>  =\s*"," >= ",re.sub("\s*<  =\s*"," <= ", spaced)))
+        spaced = re.sub("\s*! =\s*", " != ", re.sub("\s*=  =\s*", " == ", re.sub("\s*>  =\s*"," >= ",re.sub("\s*<  =\s*"," <= ", spaced))))
     return spaced.strip().split()
 
 class Expression:
@@ -146,7 +146,7 @@ class Expression:
                 raise WhatTheHeckHappenedException("control statement: ", control_statement)
         elif 'System.out.println' in self.str:
             self.value = handle_println(self.str)
-        elif re.match('[a-zA-Z][\w\s]*[^=]=[^=]', self.str):
+        elif re.match('[a-zA-Z][\w\s]*[^=<>!]=[^=]', self.str):
             self.value = assign_variable(self.str, self.env, self.stack)
         elif len(tokens) == 2 and tokens[0] in TYPES:
             self.value = declare_variable(self.str, self.env, self.stack)
