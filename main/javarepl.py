@@ -554,7 +554,7 @@ def verify_result_datatype(result, variable_name, just_declared, stored_variable
             if just_declared: # and stored_variable_value == None:
                 variable_frame.pop(variable_name)
             raise InvalidDatatypeException("Invalid datatype: result_type is " + str(result_type) + ", variable type is " + stored_variable_type)
-        elif stored_variable_type != STRING:
+        elif stored_variable_type not in STRING_TYPES:
             if just_declared: # and stored_variable_value == None:
                 variable_frame.pop(variable_name)
             raise InvalidDatatypeException("Invalid datatype: result_type is " + str(result_type) + ", variable type is " + stored_variable_type)
@@ -611,9 +611,8 @@ def handle_while(block, instance_vars, stack):
     validate_while_loop_syntax(block)
     
     tokens = clean_up_list_elems(flatten_list(re.split("while\s*\(", block)))
-    tokens = clean_up_list_elems(flatten_list(re.split("\)\s*\{", tokens)))
-    tokens = clean_up_list_elems(flatten_list(re.split("\}", tokens)))
-    print("tokens: " + str(tokens))
+    tokens = clean_up_list_elems(flatten_list(list(map(lambda x: re.split("\)\s*\{", x), tokens))))
+    tokens = clean_up_list_elems(flatten_list(list(map(lambda x: re.split("\}", x), tokens))))
     
     assert len(tokens) == 2, "There should be 2 tokens, but there are " + str(len(tokens))
     
@@ -660,6 +659,10 @@ def handle_for(block, instance_vars, stack):
         parse_eval(statements, instance_vars, stack)
         assign_variable(update, instance_vars, stack)
         
+    # Assumes well-formed expression.
+    var_name = initialize.split(" ")[1]
+    get_variable_frame(var_name, instance_vars, stack).pop(var_name)
+    
     return
     
 def validate_for_loop_syntax(block):

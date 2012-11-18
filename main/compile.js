@@ -2,42 +2,58 @@
 var counter = 1;
 
 $(document).ready(function() {
-
-    $('#add-method-btn').click(add_method);
     $('#compile-btn').click(compile);
+    $('textarea').keydown(handle_tab);
+    $('input[name="interpreter-bar"]').keydown(function(e) {
+        if (e.keyCode == 13) {
+            interpret();
+        }
+    });
+    var s = $("#interpreter-history").val('Java interpreter\n');
+
 });
-
-var method_panel1 = '<div class="method-panel">public void <input type="text" name="method-name';
-var method_panel2 = '" size=10 value="example">() {<br/><textarea class="method';
-var method_panel3 ='" rows=5 cols=64>// TODO your code here</textarea><br/>}</div>';
-
-function add_method(){
-    var s = method_panel1 + counter + method_panel2 + counter++ + method_panel3;
-    $('.method-panel').last().after(s);
-}
 
 function type(){
     var s = $("input[name='interpreter-bar']").val();
     $("#interpreter-history").append(s);
 }
 
+function handle_tab(e) {
+    var tab = '\t';
+    if(e.keyCode == 9) {
+        var start = this.selectionStart;
+        var end = this.selectionEnd;
+        var value = $(this).val();
+        $(this).val(value.substring(0, start) + tab + value.substring(end ));
+        this.selectionStart = this.selectionEnd = start + 1;
+        e.preventDefault();
+    }
+
+}
 
 function compile(){
-    var data = $("input[name='class-name']").val();
-    var fields = $("textarea.fields").val();
-    var name0 = $("input[name='method-name0']").val();
-    var bind0 = $("textarea#method0").val();
+    var data = $("#class-panel").val();
     $.ajax({
         type: 'POST',
         url: '/compile',
         dataType: 'text',
-        data: {'class_name': data,
-               'fields': fields,
-               'name0': name0,
-               'bind0': bind0,
-        },
+        data: {'data': data },
         success: function(msg) {
             alert(msg);
+        }
+    });
+}
+
+function interpret() {
+    var data = $("input[name='interpreter-bar']").val();
+    $.ajax({
+        type: 'POST',
+        url: 'interpret',
+        dataType: 'text',
+        data: {'data': data },
+        success: function(msg) {
+            var s = $("#interpreter-history").val();
+            $("#interpreter-history").val(s + 'Java> ' + msg + '\n');
         }
     });
 }
