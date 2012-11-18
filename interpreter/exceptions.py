@@ -27,3 +27,9 @@ class InvalidIfElseBlockException(JavaException):
 
 class WhatTheHeckHappenedException(JavaException):
     pass
+
+class InvalidWhileLoopException(JavaException):
+    pass
+
+class InvalidForLoopException(JavaException):
+    pass
