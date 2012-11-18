@@ -13,6 +13,8 @@ unevaled = ''
 memory = []
 stack = [{}]
 instance_variables = {}
+prompt_types = {False: "java> ", True: "...  "}
+continue_prompt = False
 
 def get_current_frame():
     return stack[-1]
@@ -31,7 +33,7 @@ def variable_lookup(var):
         return frame[var]
     raise JavaNameError(" name '{0}' is not defined".format(var))
 
-def evaluate_expression(exp_str):
+def evaluate_expression(exp_str, environment=False):
     #print('here!, string is: ', exp_str)
     
     # replace all variables with their values
@@ -42,6 +44,23 @@ def evaluate_expression(exp_str):
                 if not (item[0] == '"' and item[-1] == '"'):
                     tokens[i] = str(variable_lookup(item).get_value())
         exp_str = " ".join(tokens)
+    
+    # handle constructor
+    if re.search('new\s*[A-Z][A-Za-z]*\(', exp_str):
+        exp_str = exp_str.strip()
+        tokens = tokenize_one_expression(exp_str)
+        if len(tokens) < 4:
+            raise InvalidConstructorException('too few fields')
+        if tokens.pop(0) != 'new':
+            raise InvalidConstructorException("'new' in wrong place")
+        if tokens.pop(2) != '(':
+            raise InvalidConstructorException("'(' in wrong place")
+        if tokens.pop() != ')':
+            raise InvalidConstructorException("')' in wrong place")
+        
+        
+        return #an
+        
     
     for java_exp, python_exp in JAVA_TO_PYTHON.items():
         exp_str = exp_str.replace(java_exp, ' ' + python_exp + ' ')
@@ -121,10 +140,10 @@ def analyze(lst):
     return expressions
     
     
-def eval_commands(commands):
+def eval_commands(commands, should_print=True):
     for exp in commands:
         value = exp.eval()
-        if value != None:
+        if value != None and should_print:
             print(java_form(value))
     return
     
@@ -144,7 +163,7 @@ def read_eval_print_loop():
     """Run a read-eval-print loop for JavaInterpreter."""
     while True:
         try:
-            exp = parse(input('java> '))
+            exp = parse(input(prompt_types[continue_prompt]))
             eval_commands(exp)
         except (JavaException, SyntaxError, TypeError, ZeroDivisionError) as err:
             print(type(err).__name__ + ':', err)
