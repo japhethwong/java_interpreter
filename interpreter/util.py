@@ -1,7 +1,7 @@
 '''
 util.py
 Contains utility functions that are useful across the program
-@author: Japheth Wong
+@author: Japheth Wong, Joy Jeng
 '''
 from constants import *
 
@@ -35,6 +35,27 @@ def parse_value(value):
     
     return to_return
             
+"""
+clean_up_list_elems() takes a list and removes all empty list elements.  It also strips each element.
+
+Arguments:
+lst -- the list that we want to remove empty elements from
+
+Returns:
+A list with the length-0 elements removed
+"""
+def clean_up_list_elems(lst):
+    return list(filter(lambda x: len(x) > 0, list(map(lambda x: x.strip(), lst))))
+
+"""
+flatten_list() takes a list and flattens it by combining sub-lists into a single list.
+
+Arguments:
+lst -- the list to be flattened
+
+Returns:
+A list that has been flattened (none of the elements are lists)
+"""
 def flatten_list(lst):
     """
     >>> flatten_list([1, 2, [3, 4], [[[3], 4]]])
@@ -45,4 +66,3 @@ def flatten_list(lst):
     if type(lst[0]) == list:
         return flatten_list(lst[0]) + flatten_list(lst[1:])
     return [lst[0]] + flatten_list(lst[1:])
-    

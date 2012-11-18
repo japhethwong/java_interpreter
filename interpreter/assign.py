@@ -8,6 +8,7 @@ from exceptions import *
 from variable import *
 from constants import *
 from javarepl import evaluate_expression
+from util import clean_up_list_elems
 
 """
 tokenize_assignment_statement() takes an assignment statement, pads it with spaces, and preserves 
@@ -76,7 +77,7 @@ Exceptions:
 InvalidDeclarationException -- raised if the declaration provided is not a well-formed variable declaration
 """
 def split_declaration(declaration):
-    declaration_tokens = list(filter(lambda x: len(x) > 0, declaration.split(" ")))
+    declaration_tokens = clean_up_list_elems(declaration.split(" ")) 
     
     if len(declaration_tokens) == 1:   # Represents an assignment statement to a variable previously declared.
         datatype, name = None, declaration_tokens[0].strip()

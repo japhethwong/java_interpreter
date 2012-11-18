@@ -3,6 +3,7 @@ import re
 from constants import *
 from variable import *
 from assign import *
+from compile_eval import *
 
 try:
     import readline  # Enables access to previous expressions in the REPL
@@ -32,6 +33,28 @@ def variable_lookup(var):
     if frame:
         return frame[var]
     raise JavaNameError(" name '{0}' is not defined".format(var))
+    
+def handle_constructor(exp_str):
+    exp_str = exp_str.strip()
+    tokens = tokenize_one_expression(exp_str)
+    if len(tokens) < 4:
+        raise InvalidConstructorException('too few fields')
+    if tokens.pop(0) != 'new':
+        raise InvalidConstructorException("'new' in wrong place")
+    if tokens.pop(2) != '(':
+        raise InvalidConstructorException("'(' in wrong place")
+    if tokens.pop() != ')':
+        raise InvalidConstructorException("')' in wrong place")
+    thing = initialize(tokens[0], len(tokens) - 1)
+    
+    #handle params
+    
+    
+    #handle body
+    
+    
+    return thing['obj']
+        
 
 def evaluate_expression(exp_str, environment=False):
     #print('here!, string is: ', exp_str)
@@ -47,19 +70,7 @@ def evaluate_expression(exp_str, environment=False):
     
     # handle constructor
     if re.search('new\s*[A-Z][A-Za-z]*\(', exp_str):
-        exp_str = exp_str.strip()
-        tokens = tokenize_one_expression(exp_str)
-        if len(tokens) < 4:
-            raise InvalidConstructorException('too few fields')
-        if tokens.pop(0) != 'new':
-            raise InvalidConstructorException("'new' in wrong place")
-        if tokens.pop(2) != '(':
-            raise InvalidConstructorException("'(' in wrong place")
-        if tokens.pop() != ')':
-            raise InvalidConstructorException("')' in wrong place")
-        
-        
-        return #an
+        return handle_constructor(exp_str)
         
     
     for java_exp, python_exp in JAVA_TO_PYTHON.items():
@@ -119,13 +130,17 @@ def parse(str):
     tokens = tokenize(str) # is a list of lists
     return analyze(tokens) # is a list of analyzed expressions
     
-def tokenize(str):
+def tokenize(cur_read):
     global unevaled
-    s = str.strip() 
+    s = cur_read.strip() 
     
-    # handle multiple expressions on one line
-    expressions = (unevaled + ' ' + s).split(';')
-    unevaled = expressions.pop()   
+    expressions = (unevaled + ' ' + s)
+    if continue_prompt:
+        return handle_partials(expressions)        
+    else:
+        # handle multiple expressions on one line
+        expressions = cur_read.split(';')
+        unevaled = expressions.pop()   
 
     # expressions!
     for i, str in enumerate(expressions):

@@ -1,7 +1,7 @@
 '''
 exceptions.py
 Stores the exceptions that are used in interpreter.
-@author: Japheth Wong
+@author: Japheth Wong, Joy Jeng
 '''
 
 class JavaException(Exception):
@@ -20,5 +20,8 @@ class JavaNameError(JavaException):
     pass
     
 class InvalidSystemCallException(JavaException):
+    pass
+
+class InvalidIfElseBlockException(JavaException):
     pass
 
