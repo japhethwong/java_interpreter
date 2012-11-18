@@ -80,7 +80,9 @@ def evaluate_expression(exp_str, instance_environment, exp_stack):
         tokens = tokenize_one_expression(exp_str)
         for i, item in enumerate(tokens):
             if (re.search('[a-z]', item) and item not in KEYWORDS):
-                if not (item[0] == '"' and item[-1] == '"'):
+                #print("HERE!!", item)
+                if not ((item[0] == '"' and item[-1] == '"') or (item[0] == "'" and item[-1] == "'")):
+                    #print("HERE2")
                     tokens[i] = str(variable_lookup(item, instance_environment, exp_stack).get_value())
         exp_str = " ".join(tokens)
     
@@ -520,6 +522,10 @@ def update_variable(statement, instance_vars, stack, just_declared=False):
     # Check to ensure result datatype matches variable datatype
     verify_result_datatype(result, variable_name, just_declared, stored_variable_type, instance_vars, stack)
 
+    # If string type, put quotes around it.
+    if result_type is str:
+        result = '"' + result + '"'
+    
     # Now that we know it is  valid, write to variable.
     variable_frame[variable_name].set_value(result)
     
