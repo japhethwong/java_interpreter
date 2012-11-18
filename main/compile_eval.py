@@ -5,6 +5,19 @@ from variable import *
 from javarepl import *  
 ### INTERFACE METHODS ####
 
+def compile(parsed_input):
+    """
+    Function called by the Online interface Parser
+    to create a list of External classes to send
+    to the interpreter.
+    """
+    for cls in parsed_input:
+        CLASSES[cls['name']] = InternalClass(cls)
+    output = []
+    for cls in CLASSES:
+        output.append(ExternalClass(CLASSES[cls]))
+    return output
+
 def initialize(cls_name, num_args):
     """
     Interface method to interpreter
@@ -74,9 +87,9 @@ class InternalClass(object):
                 static = bool if attribute is static
         """
         if static: 
-            self.static_attr[name] = [typ, '']
+            self.static_attr[name] = [typ, ';']
         else:
-            self.instance_attr[name] = [typ, '']
+            self.instance_attr[name] = [typ, ';']
 
 
     def update_attribute(self, name, val):
@@ -235,7 +248,6 @@ if __name__ == '__main__':
         cls.print_fields()
     reset_classes()
     
-    
     code2 = 'class HelloWorld { public HelloWorld(String s, float y) { s = "hello"; y = 10.1; } void hello(){s;} double num(int x) { return x*y;}}'
 
     input2 = read_line(code2)
@@ -249,3 +261,12 @@ if __name__ == '__main__':
     print('Processing to InternalClass now:')
     for cls in lst:
         cls.print_fields()
+
+
+    reset_classes()
+    code3 = 'class Numbers { public Numbers(bool s, short r, long t) { s = true; r = 1332, t = 135 } static int w; double x = 32; String s = "numbers";}'
+
+    input3 = read_line(code3)
+    x = compile(input3)
+    for elem in x: 
+        elem.print_fields()
