@@ -21,30 +21,28 @@ prompt_types = {False: "java> ", True: "...  "}
 continue_prompt = False
 
 def print_vars():
-    return
+    #return
     print("-------------Printing variables-------------")
     print("STACK: ", stack)
+    print("STACK ID: ", id(stack))
     print("INSTANCE VARS", instance_variables)
     print("-----------------------------------------")
 
-def get_current_frame():
-    return stack[-1]
     
-def get_variable_frame(var):
-    frame = get_current_frame()
-    if var in frame:
-        return frame
-    if var in instance_variables:
-        return instance_variables
+def get_variable_frame(var, env, s):
+    if var in s:
+        return s
+    if var in env:
+        return env
     return None
     
-def variable_lookup(var):
-    frame = get_variable_frame(var)
+def variable_lookup(var, env, s):
+    frame = get_variable_frame(var, env, s)
     if frame:
         return frame[var]
     raise JavaNameError(" name '{0}' is not defined".format(var))
     
-def handle_constructor(exp_str):
+def handle_constructor(exp_str, instance_env, exp_stack):
     exp_str = exp_str.strip()
     tokens = tokenize_one_expression(exp_str)
     if len(tokens) < 4:
@@ -56,22 +54,22 @@ def handle_constructor(exp_str):
     if tokens.pop() != ')':
         raise InvalidConstructorException("')' in wrong place")
         
-    stack.append(dict())
+    exp_stack.append(dict())
     #thing = initialize(tokens.pop(0), len(tokens))
     
     #handle params
     for param in thing['args']:
-        assign_variable(param + ' = ' + tokens.pop(0), instance_attributes, stack)
+        assign_variable(param + ' = ' + tokens.pop(0), instance_attributes, exp_stack)
     
     #handle body
     parse_eval(thing['constructor'], thing['obj'].get_instance_attributes())    
     
-    stack.pop()
+    exp_stack.pop()
     
     return thing['obj']
         
 
-def evaluate_expression(exp_str, instance_environment=False):
+def evaluate_expression(exp_str, instance_environment, exp_stack):
     #print('here!, string is: ', exp_str)
     # replace all variables with their values
     print_vars()
@@ -81,7 +79,7 @@ def evaluate_expression(exp_str, instance_environment=False):
         for i, item in enumerate(tokens):
             if (re.search('[a-z]', item) and item not in KEYWORDS):
                 if not (item[0] == '"' and item[-1] == '"'):
-                    tokens[i] = str(variable_lookup(item).get_value())
+                    tokens[i] = str(variable_lookup(item, instance_environment, exp_stack).get_value())
         exp_str = " ".join(tokens)
     
     # handle constructor
@@ -113,10 +111,11 @@ def tokenize_one_expression(str):
     return spaced.strip().split()
 
 class Expression:
-    def __init__(self, str=None, env=None):
+    def __init__(self, str=None, env=None, s=None):
         self.str = str.strip()
         self.value = 'n/a'
         self.env = env if env is not None else instance_variables
+        self.stack = s if s is not None else stack
         
     def eval(self):
         if self.str == None:
@@ -129,21 +128,25 @@ class Expression:
                 break
         if control_statement:
             if control_statement == 'for':
-                self.value = handle_for(self.str, self.env, stack)
+                self.value = handle_for(self.str, self.env, self.stack)
             elif control_statement == 'while':
-                self. value = handle_while(self.str, self.env, stack)
+                self. value = handle_while(self.str, self.env, self.stack)
             elif control_statement == 'if':
-                self.value = parse_eval(handle_conditional_statements(self.str, self.env, stack), self.env)
+                result = handle_conditional_statements(self.str, self.env, self.stack)
+                if result:
+                    self.value = parse_eval(result)
+                else:
+                    self.value = result
             else:
                 raise WhatTheHeckHappenedException("control statement: ", control_statement)
         elif 'System.out.println' in self.str:
             self.value = handle_println(self.str)
         elif re.match('[a-zA-Z][\w\s]*[^=]=[^=]', self.str):
-            self.value = assign_variable(self.str, self.env, stack)
+            self.value = assign_variable(self.str, self.env, self.stack)
         elif len(tokens) == 2 and tokens[0] in TYPES:
-            self.value = declare_variable(self.str, self.env, stack)
+            self.value = declare_variable(self.str, self.env, self.stack)
         else:
-            self.value = evaluate_expression(self.str)            
+            self.value = evaluate_expression(self.str, self.env, self.stack)            
         print_vars()
         "######################################"
         return self.value
