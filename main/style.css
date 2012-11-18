@@ -1,22 +1,27 @@
-div.class-panel {
-    position:relative;
+
+body {
+    margin:0;
+    font-size:100%;
 }
 
-div.method-panel, textarea, #add-method-btn{
-    position:relative;
-    left:2em;
+#header h1 {
+    text-align:center;
+}
+
+textarea {
+    font-family:courier, monotype;
+}
+
+div.class-panel {
+    max-width:55em;
+    padding-left:2em;
+    float:left;
 }
 
 div.interpreter-panel {
-    position:absolute;
-    top:100px;
-    left:650px;
-    
-}
-
-#interpreter p {
     position:relative;
-    top:0px;
-    left:50px;
+    max-width:55em;
+    padding-right:2em;
+    float:right;
 }
 
