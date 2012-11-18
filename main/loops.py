@@ -34,7 +34,7 @@ def handle_while(block, instance_vars, stack):
     
     condition, statements = tokens[0], tokens[1]
     
-    while evaluate_expression(condition):
+    while evaluate_expression(condition, instance_vars, stack):
         parse_eval(statements, instance_vars, stack)    # We will NOT support different scoping for variables inside.
         
     return  # Call parse_eval with instance_vars
