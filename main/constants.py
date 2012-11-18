@@ -1,5 +1,6 @@
 """constants"""
 DELIMITERS = {'(': ')', '{': '}'}
+SPACE = ['+','-','/','//','*', '<', '>', '=']
 JAVA_TO_PYTHON = {'||': 'or', '&&': 'and', 'true': 'True', 'false': 'False'}
 PYTHON_TO_JAVA = {val: key for key, val in JAVA_TO_PYTHON.items()}
 THING_TO_REPLACE = 'SIEHRIESHRESIHRESIRHES'
