@@ -45,13 +45,18 @@ def handle_constructor(exp_str):
         raise InvalidConstructorException("'(' in wrong place")
     if tokens.pop() != ')':
         raise InvalidConstructorException("')' in wrong place")
-    thing = initialize(tokens[0], len(tokens) - 1)
+        
+    stack.append(dict())
+    thing = initialize(tokens.pop(0), len(tokens))
     
     #handle params
-    
+    for param in thing['args']:
+        assign_variable(param + ' = ' + tokens.pop(0), instance_attributes, stack)
     
     #handle body
+    parse_eval(thing['constructor'], thing['obj'].get_instance_attributes())    
     
+    stack.pop()
     
     return thing['obj']
         
@@ -99,9 +104,10 @@ def tokenize_one_expression(str):
     return spaced.strip().split()
 
 class Expression:
-    def __init__(self, str=None):
+    def __init__(self, str=None, env=None):
         self.str = str.strip()
         self.value = 'n/a'
+        self.env = env if env is not None else instance_variables
         
     def eval(self):
         if self.str == None:
@@ -110,9 +116,9 @@ class Expression:
         if 'System.out.println' in self.str:
             self.value = handle_println(self.str)
         elif re.match('[a-zA-Z][\w\s]*[^=]=[^=]', self.str):
-            self.value = assign_variable(self.str, instance_variables, stack)
+            self.value = assign_variable(self.str, self.env, stack)
         elif len(tokens) == 2 and tokens[0] in TYPES:
-            self.value = declare_variable(self.str, instance_variables, stack)
+            self.value = declare_variable(self.str, self.env, stack)
         else:
             self.value = evaluate_expression(self.str)            
             
@@ -126,9 +132,9 @@ class Expression:
         return 'Exp({0})'.format(self.value)
         
     
-def parse(str):
+def parse(str, env=None):
     tokens = tokenize(str) # is a list of lists
-    return analyze(tokens) # is a list of analyzed expressions
+    return analyze(tokens, env) # is a list of analyzed expressions
     
 def tokenize(cur_read):
     global unevaled
@@ -148,10 +154,10 @@ def tokenize(cur_read):
         
     return expressions
     
-def analyze(lst):
+def analyze(lst, env=None):
     expressions = []
     for item in lst:
-        expressions.append(Expression(item))
+        expressions.append(Expression(item, env))
     return expressions
     
     
@@ -174,12 +180,14 @@ def handle_println(exp_str):
     thing_to_eval = thing_to_eval[:-1]
     print(Expression(thing_to_eval).eval())
 
+def parse_eval(strg):
+    return eval_commands(parse(strg))
+    
 def read_eval_print_loop():
     """Run a read-eval-print loop for JavaInterpreter."""
     while True:
         try:
-            exp = parse(input(prompt_types[continue_prompt]))
-            eval_commands(exp)
+            parse_eval(input(prompt_types[continue_prompt]))
         except (JavaException, SyntaxError, TypeError, ZeroDivisionError) as err:
             print(type(err).__name__ + ':', err)
         except (KeyboardInterrupt, EOFError):  # <Control>-D, etc.
