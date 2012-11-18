@@ -116,11 +116,11 @@ def read_declare(datatype, tokens):
     return {'op': 'declare', 'name': name, 'type': datatype}
 
 def read_assign(name, tokens):
-    value = ''
+    value = []
     while tokens[0] != ';':
-        value += tokens.pop(0)
+        value.append(tokens.pop(0))
     tokens.pop(0)
-    return {'op': 'assign', 'name': name, 'value': value}
+    return {'op': 'assign', 'name': name, 'value': " ".join(value)}
 
 def read_method(name, datatype, tokens):
     args = []
@@ -137,15 +137,15 @@ def read_method(name, datatype, tokens):
         raise SyntaxError("method declaration is invalid")
     tokens.pop(0); tokens.pop(0)
 
-    body, parens = '', 1
+    body, parens = [], 1
     while parens:
         val = tokens.pop(0)
         if val == '{':
             parens += 1
         elif val == '}':
             parens -= 1
-        body += val
-    body = body[:-1]
+        body.append(val)
+    body = " ".join(body[:-1])
     return {'op': 'method', 'name': name, 'type': datatype,
             'args': args, 'body': body}
 
