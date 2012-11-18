@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel='stylesheet' type='text/css' href='style'>
+    <script type='text/javascript' src='jquery'></script>
+    <script type='text/javascript' src='compile-script'></script>
+  </head>
+  <body>
+    <div id='header'>
+      <h1>Java Interpreter</h1>
+    </div>
+    <button id='compile-btn'>Compile</button></br>
+    <div class='class-panel'>
+      class <input type='text' name='class-name' value='Example'> {<br/>
+      <textarea class='fields' rows=5 cols=68>
+int x = 3;
+      </textarea>
+      <br/>
+      <div class='method-panel'>
+        public <input type='text' name='method-name0' size=10 value='int'><input type='text' name='method-name0' size=10 value='example'>(){
+        <br/>
+        <textarea id='method0' rows=5 cols=64>
+int x = 2;
+        </textarea>
+        <br/>
+        }
+      </div>
+      <br/>
+      <!--<button id='add-method-btn'>Add method</button><br/>-->
+      }
+    </div>
+
+    <div class='interpreter-panel'>
+      <textarea readonly cols=72 rows=20 id='interpreter-history'>
+      </textarea>
+      <p>Java&gt; <input type='text' name='interpreter-bar'></p>
+    </div>
+
+  </body>
+</html>

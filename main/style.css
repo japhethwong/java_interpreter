@@ -1,0 +1,22 @@
+div.class-panel {
+    position:relative;
+}
+
+div.method-panel, textarea, #add-method-btn{
+    position:relative;
+    left:2em;
+}
+
+div.interpreter-panel {
+    position:absolute;
+    top:100px;
+    left:650px;
+    
+}
+
+#interpreter p {
+    position:relative;
+    top:0px;
+    left:50px;
+}
+
