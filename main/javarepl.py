@@ -5,7 +5,7 @@ from variable import *
 from assign import *#assign_variable, declare_variable
 from conditionals import *#handle_conditional_statements
 #from loops import *
-#from compile_eval import *
+from compile_eval import *
 from exceptions import *
 
 try:
