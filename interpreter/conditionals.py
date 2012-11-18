@@ -18,6 +18,8 @@ statements once the branch is chosen.
 Arguments:
 if_else_block -- this is a complete if-else block, beginning with "if ... " and ending with 
 the closing curly brace of the last branch in the block.
+instance_vars -- dictionary representing the instance variables
+stack -- the stack as represented in our system
 
 Returns:
 The statements associated with the correct branch, or None if none of the conditions are met
@@ -25,7 +27,7 @@ The statements associated with the correct branch, or None if none of the condit
 Exceptions Raised:
 InvalidIfElseBlockException -- raised if the syntax is invalid for an if-else block.
 """
-def handle_conditional_statements(if_else_block):
+def handle_conditional_statements(if_else_block, instance_vars, stack):
     has_else_clause = verify_if_else_syntax(if_else_block)
     
     # Tokenize if-else block: split conditions from statements

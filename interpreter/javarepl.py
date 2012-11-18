@@ -2,8 +2,10 @@
 import re
 from constants import *
 from variable import *
-from assign import *
-from compile_eval import *
+from assign import *#assign_variable, declare_variable
+from conditionals import *#handle_conditional_statements
+#from loops import *
+#from compile_eval import *
 from exceptions import *
 
 try:
@@ -17,6 +19,13 @@ stack = [{}]
 instance_variables = {}
 prompt_types = {False: "java> ", True: "...  "}
 continue_prompt = False
+
+def print_vars():
+    return
+    print("-------------Printing variables-------------")
+    print("STACK: ", stack)
+    print("INSTANCE VARS", instance_variables)
+    print("-----------------------------------------")
 
 def get_current_frame():
     return stack[-1]
@@ -62,10 +71,11 @@ def handle_constructor(exp_str):
     return thing['obj']
         
 
-def evaluate_expression(exp_str, environment=False):
+def evaluate_expression(exp_str, instance_environment=False):
     #print('here!, string is: ', exp_str)
-    print('HERE')
     # replace all variables with their values
+    print_vars()
+    "######################################"
     if (re.search('[a-z]', exp_str)): # match potential variable names
         tokens = tokenize_one_expression(exp_str)
         for i, item in enumerate(tokens):
@@ -112,21 +122,30 @@ class Expression:
         if self.str == None:
             return
         tokens = tokenize_one_expression(self.str)
-        if 'System.out.println' in self.str:
+        control_statement = None
+        for token in tokens:
+            if token in CONTINUE_KEYWORDS:
+                control_statement = token                
+                break
+        if control_statement:
+            if control_statement == 'for':
+                self.value = handle_for(self.str, self.env, stack)
+            elif control_statement == 'while':
+                self. value = handle_while(self.str, self.env, stack)
+            elif control_statement == 'if':
+                self.value = parse_eval(handle_conditional_statements(self.str, self.env, stack), self.env)
+            else:
+                raise WhatTheHeckHappenedException("control statement: ", control_statement)
+        elif 'System.out.println' in self.str:
             self.value = handle_println(self.str)
         elif re.match('[a-zA-Z][\w\s]*[^=]=[^=]', self.str):
             self.value = assign_variable(self.str, self.env, stack)
         elif len(tokens) == 2 and tokens[0] in TYPES:
             self.value = declare_variable(self.str, self.env, stack)
-        elif 'for' in self.str:
-            self.value = handle_for(self.str, self.env, stack)
-        elif 'while' in self.str:
-            self. value = handle_while(self.str, self.env, stack)
-        elif 'if' in self.str:
-            self.value = parse_eval(handle_conditional(self.str), self.env)
         else:
             self.value = evaluate_expression(self.str)            
-            
+        print_vars()
+        "######################################"
         return self.value
         
         
@@ -203,11 +222,11 @@ def read_eval_print_loop():
     while True:
         try:
             parse_eval(input(prompt_types[continue_prompt]))
-        except (JavaException) as er:#, SyntaxError, TypeError, ZeroDivisionError) as err:
+        except (JavaException) as err:#, SyntaxError, TypeError, ZeroDivisionError) as err:
             print(type(err).__name__ + ':', err)
         except (KeyboardInterrupt, EOFError):  # <Control>-D, etc.
             print('<(^ ^)>')
             return
-
+            
 if __name__ == '__main__':
     read_eval_print_loop()
