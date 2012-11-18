@@ -2,6 +2,13 @@
 
 import re
 
+MODIFIERS = ('public', 'protected', 'private')
+DELIMS = ('{', '}',
+          '(', ')',
+          '[', ']',
+          '=', ';', ',')
+
+
 def tokenize(src):
     """Tokenizes an input string.
 
@@ -11,18 +18,10 @@ def tokenize(src):
     ['int', 'x', '(', ')', '{', '}']
     """
 
-    src = src.replace("{", " { ")
-    src = src.replace("}", " } ")
-    src = src.replace("(", " ( ")
-    src = src.replace(")", " ) ")
-    src = src.replace("[", " [ ")
-    src = src.replace("]", " ] ")
-    src = src.replace("=", " = ")
-    src = src.replace(";", " ; ")
-    src = src.replace(",", " , ")
+    for delim in DELIMS:
+        src = src.replace(delim, ' ' + delim + ' ')
     return src.split()
 
-MODIFIERS = ('public', 'protected', 'private')
 
 def validate_name(name):
     """Determines if NAME is a valid identifier. 
@@ -325,7 +324,7 @@ def read_line(line):
 def repl():
     """For testing purposes."""
     while True:
-        line = input("> ")
+        line = input("Parse> ")
         print(read_line(line))
 
 if __name__ == '__main__':
@@ -345,7 +344,7 @@ def test_read_statement():
     test3 = read_statement(tokenize('x = 4;'))
     assert test3['op'] == 'assign', 'test3 failed'
     assert test3['name'] == 'x', 'test3 failed'
-    assert test3['value'] == '4', 'test3 failed'
+    assert test3['value'] == '4;', 'test3 failed'
 
     test4 = read_statement(tokenize('int foo() {}'))
     assert test4['op'] == 'method', 'test4 failed'
