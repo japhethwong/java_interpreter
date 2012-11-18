@@ -24,7 +24,7 @@ continue_prompt = False
 
 def print_vars():
     return
-    print("-------------Printing variables-------------")
+    print("-------------Printing variables------------")
     print("STACK: ", stack)
     print("STACK ID: ", id(stack))
     print("INSTANCE VARS", instance_variables)
