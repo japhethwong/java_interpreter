@@ -14,12 +14,17 @@ function add_method(){
 
 
 function compile(){
+    var data = $("input[name='class-name']").val();
+    var fields = $("textarea.fields").val();
     $.ajax({
         type: 'POST',
-        url: 'runprogram.py',
-        dataType: 'html'
-    }).done(function(msg) {
-        alert(msg);
+        url: '/hello',
+        dataType: 'text',
+        data: {'class_name': data,
+               'fields': fields},
+        success: function(msg) {
+            alert(msg);
+        }
     });
 }
 
