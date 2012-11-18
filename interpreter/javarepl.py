@@ -2,8 +2,10 @@
 import re
 from constants import *
 from variable import *
-from assign import *
-from compile_eval import *
+from assign import *#assign_variable, declare_variable
+from conditionals import *#handle_conditional_statements
+#from loops import *
+#from compile_eval import *
 from exceptions import *
 
 try:
@@ -17,6 +19,13 @@ stack = [{}]
 instance_variables = {}
 prompt_types = {False: "java> ", True: "...  "}
 continue_prompt = False
+
+def print_vars():
+    return
+    print("-------------Printing variables-------------")
+    print("STACK: ", stack)
+    print("INSTANCE VARS", instance_variables)
+    print("-----------------------------------------")
 
 def get_current_frame():
     return stack[-1]
@@ -48,7 +57,7 @@ def handle_constructor(exp_str):
         raise InvalidConstructorException("')' in wrong place")
         
     stack.append(dict())
-    thing = initialize(tokens.pop(0), len(tokens))
+    #thing = initialize(tokens.pop(0), len(tokens))
     
     #handle params
     for param in thing['args']:
@@ -62,10 +71,11 @@ def handle_constructor(exp_str):
     return thing['obj']
         
 
-def evaluate_expression(exp_str, environment=False):
+def evaluate_expression(exp_str, instance_environment=False):
     #print('here!, string is: ', exp_str)
-    
     # replace all variables with their values
+    print_vars()
+    "######################################"
     if (re.search('[a-z]', exp_str)): # match potential variable names
         tokens = tokenize_one_expression(exp_str)
         for i, item in enumerate(tokens):
@@ -87,14 +97,12 @@ def evaluate_expression(exp_str, environment=False):
         new_str = re.sub(floatdouble_casting, '', exp_str)
         # make sure division works
         exp_str = str(float(eval(new_str)))
-        print("THHISSS")
     if '//' in exp_str:
         raise SyntaxError("// is invalid")
     if "/"  in exp_str and (re.search('\d+\.\d+', exp_str) is None):
         exp_str = exp_str.replace('/', '//')  
     
     
-        
     return eval(exp_str)
     
 def tokenize_one_expression(str):
@@ -114,7 +122,21 @@ class Expression:
         if self.str == None:
             return
         tokens = tokenize_one_expression(self.str)
-        if 'System.out.println' in self.str:
+        control_statement = None
+        for token in tokens:
+            if token in CONTINUE_KEYWORDS:
+                control_statement = token                
+                break
+        if control_statement:
+            if control_statement == 'for':
+                self.value = handle_for(self.str, self.env, stack)
+            elif control_statement == 'while':
+                self. value = handle_while(self.str, self.env, stack)
+            elif control_statement == 'if':
+                self.value = parse_eval(handle_conditional_statements(self.str, self.env, stack), self.env)
+            else:
+                raise WhatTheHeckHappenedException("control statement: ", control_statement)
+        elif 'System.out.println' in self.str:
             self.value = handle_println(self.str)
         elif re.match('[a-zA-Z][\w\s]*[^=]=[^=]', self.str):
             self.value = assign_variable(self.str, self.env, stack)
@@ -122,7 +144,8 @@ class Expression:
             self.value = declare_variable(self.str, self.env, stack)
         else:
             self.value = evaluate_expression(self.str)            
-            
+        print_vars()
+        "######################################"
         return self.value
         
         
@@ -138,22 +161,32 @@ def parse(str, env=None):
     return analyze(tokens, env) # is a list of analyzed expressions
     
 def tokenize(cur_read):
-    global unevaled
+    global unevaled, continue_prompt
     s = cur_read.strip() 
     
     expressions = (unevaled + ' ' + s)
-    if continue_prompt:
-        return handle_partials(expressions)        
+    for item in CONTINUE_KEYWORDS:
+        if item in expressions:
+            continue_prompt = True
+    
+    if continue_prompt and cur_read == '':
+        continue_prompt = False
+        unevaled = ''
+        exp_lst = [expressions]
+    elif continue_prompt:
+        unevaled = expressions
+        exp_lst = []
     else:
         # handle multiple expressions on one line
-        expressions = cur_read.split(';')
-        unevaled = expressions.pop()   
+        exp_lst = cur_read.split(';')
+        unevaled = exp_lst.pop()   
 
     # expressions!
-    for i, str in enumerate(expressions):
-        expressions[i] = str
+    for i, str in enumerate(exp_lst):
+        exp_lst[i] = str
         
-    return expressions
+    return exp_lst
+    
     
 def analyze(lst, env=None):
     expressions = []
@@ -181,19 +214,19 @@ def handle_println(exp_str):
     thing_to_eval = thing_to_eval[:-1]
     print(Expression(thing_to_eval).eval())
 
-def parse_eval(strg):
-    return eval_commands(parse(strg))
+def parse_eval(strg, env = None):
+    return eval_commands(parse(strg, env))
     
 def read_eval_print_loop():
     """Run a read-eval-print loop for JavaInterpreter."""
     while True:
         try:
             parse_eval(input(prompt_types[continue_prompt]))
-        except (JavaException, SyntaxError, TypeError, ZeroDivisionError) as err:
+        except (JavaException) as err:#, SyntaxError, TypeError, ZeroDivisionError) as err:
             print(type(err).__name__ + ':', err)
         except (KeyboardInterrupt, EOFError):  # <Control>-D, etc.
             print('<(^ ^)>')
             return
-
+            
 if __name__ == '__main__':
     read_eval_print_loop()

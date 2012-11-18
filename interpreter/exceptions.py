@@ -25,3 +25,5 @@ class InvalidSystemCallException(JavaException):
 class InvalidIfElseBlockException(JavaException):
     pass
 
+class WhatTheHeckHappenedException(JavaException):
+    pass
