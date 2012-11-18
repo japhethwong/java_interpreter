@@ -7,7 +7,7 @@ import re
 from exceptions import *
 from variable import *
 from constants import *
-from javarepl import evaluate_expression
+# from javarepl import evaluate_expression
 from util import clean_up_list_elems
 
 """
@@ -138,6 +138,7 @@ Exceptions:
 InvalidDatatypeException -- the datatype does not match the variable value
 """
 def update_variable(statement, instance_vars, stack, just_declared=False):
+    from javarepl import evaluate_expression
     tokens = tokenize_assignment_statement(statement)
     if len(tokens) != 2:
         raise InvalidAssignmentException("Statement provided was: " + statement)
