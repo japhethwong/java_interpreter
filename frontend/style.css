@@ -7,3 +7,16 @@ div.method-panel, textarea, #add-method-btn{
     left:2em;
 }
 
+div.interpreter-panel {
+    position:absolute;
+    top:100px;
+    left:650px;
+    
+}
+
+#interpreter p {
+    position:relative;
+    top:0px;
+    left:50px;
+}
+
