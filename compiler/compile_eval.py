@@ -10,8 +10,6 @@ def initialize(cls_name, num_args):
     After receiving constructor in interpreter, return a instance 
     of the ExternalClass object to send to the interpreter.
     """
-    #TODO Still some stuff to do 
-    # create an instance_obj
     constructor = CLASSES[cls_name].constructors[num_args]
     
     instance_obj = ExternalClass(CLASSES[cls_name])
@@ -57,35 +55,38 @@ class InternalClass(object):
         self.constructors = {}  #{num_args : body}
         self.eval_class(cls)
 
+
     def add_attribute(self, typ, name, static):
         """
-        ARGS: typ = string of type i.e.'string', 'bool', 'int', etc. 
-             name = string name of attribute
-           static = bool if attribute is static
-        Adds an attribute known to the the class
+        Adds an attribute to the class
+        ARGS:   typ = string of type i.e.'string', 'bool', 'int', etc. 
+                name = string name of attribute
+                static = bool if attribute is static
         """
         if static: 
             self.static_attr[name] = [typ, None]
         else:
             self.instance_attr[name] = [typ, None]
 
+
     def update_attribute(self, name, val):
+        """
+        Reassigns the value of 'name' to val
+        ARGS:   name = name of attribute
+                val = value to assign to attribute
+        """
         if name in self.static_attr:
             self.static_attr[name][1] = val 
         else:
             self.instance_attr[name][1] = val
 
+
     def add_method(self,typ, name, body, args): 
         self.methods[(name, len(args))] = [typ,args,body]
 
+
     def add_constructor(self, num_args, args, body):
         self.constructors[num_args] = [args, body]
-
-    def get_attributes(self):
-        return self.static_attr
-
-    def get_methods(self):
-        return self.methods
 
     def eval_class(self, cls):
         """
@@ -107,6 +108,7 @@ class InternalClass(object):
     def eval_declare(self,expr, cls_name):
         """
         Declares a variable in a class
+        ARGS:   expr = dictionary of 
         """
         self.add_attribute(expr['type'],expr['name'],expr['static']) 
 
@@ -130,15 +132,10 @@ class InternalClass(object):
         self.add_constructor(len(expr['args']),expr['args'], expr['body'])
 
 
-    def print_attributes(self):
+    def print_fields(self):
         print('STATIC ATTRIBUTES:\n \t {} '.format(self.static_attr))
         print('INSTANCE ATTRIBUTES:\n \t {}'.format(self.instance_attr))
-
-
-    def print_methods(self):
         print('METHODS:\n \t {} \n'.format(self.methods))
-   
-    def print_constructs(self):
         print('CONSTRUCTORS: \n \t {} \n'.format(self.constructors))
 
 
@@ -150,16 +147,15 @@ class ExternalClass(object):
         """
         Constructor for external representation of a class.
         Used to send class information to the Interpreter
+        args:  cls = InternalClass object
         """
         self.name = cls.name
         self.methods = {}
         self.instance_attr = {}
         self.static_attr = {}
-  
-        self._process_instance_attr(cls)
-        self._process_static_attr(cls)
+        self._populate(cls) 
 
-    ####README JOY!!!#####
+    # Getter & Setter Methods
     def set_instance_attr(self, name, val):
         self.instance_attributes[name] = val
 
@@ -175,29 +171,43 @@ class ExternalClass(object):
     def get_static_attributes(self):
         return self.static_attr
 
-    def _populate_class(self, cls):
-        self.methods = cls.methods
-        self.instance_attr = cls.instance_attr
-        self.static_attr = cls.static_attr
-    ####################
 
-    def _process_instance_attr(self, cls):
+    # Setter Methods
+    def _populate(self,cls):
+        """
+        Populates the ExternalClass object by processing
+        fields in the InternalClass into a readable form
+        for the interpreter
+        """
+        self._process_instance_attr(cls)
+        self._process_static_attr(cls)
+        self._process_methods(cls)
+
+    def _process_instance_attr(self, cls): #TODO Check datatype
         for var in cls.instance_attr:
-            self.instance_attr[var] = evaluate_stuff #TODO
+            typ = cls.instance_attr[var][0]
+            val = cls.instance_attr[var][1]      # parse_eval(cls.instance_attr[var][1])
+            self.instance_attr[var] = (val, typ,var)          #Variable(val, typ, var)
 
-    def _process_static_attr(self, cls):
+    def _process_static_attr(self, cls): #TODO
         for var in cls.static_attr:
-            self.static_attr[var] = evaluate_stuff #TODO
+            typ = cls.static_attr[var][0]
+            val = cls.static_attr[var][1]#parse_eval(cls.static_attr[var][1])
+            self.static_attr[var] = (val, typ, var)        #Variable(val, typ, var)
 
-    #TODO
-    def _process_methods(self, cls):
+    def _process_methods(self, cls): #TODO
         for method in cls.methods:
-
-        
+            pass
+              
+    def print_fields(self):
+        print(self.name)
+        print('INSTANCE ATTRIBUTES: \n {} \n'.format(self.instance_attr))
+        print('STATIC ATTRIBUTES: \n {} \n'.format(self.static_attr))
 
 
 ###TESTING####
 if __name__ == '__main__':
+
     code1 = 'class Ex { static int x = 3; int y=4; int z; x=4+3; int foo(int a, int b) { a + b;} public Ex (int b, int c) {b = 4; c = 5; } }'
     input1 = read_line(code1)
     for c in input1:
@@ -205,6 +215,7 @@ if __name__ == '__main__':
     print('Read_line: \n {} \n'.format(input1))
     print(CLASSES)
     for cls in CLASSES.values():
-        cls.print_attributes()
-        cls.print_methods()
-        cls.print_constructs()
+        cls.print_fields() 
+    print('Processing to InternalClass now:')
+    ic = ExternalClass(CLASSES.values()[0])
+    ic.print_fields()
