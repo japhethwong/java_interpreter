@@ -1,6 +1,7 @@
 #! /usr/bin/python3
 
 import re
+from constants import TYPES
 
 MODIFIERS = ('public', 'protected', 'private')
 DELIMS = ('{', '}',
@@ -97,6 +98,8 @@ def read_statement(tokens):
         return read_assign(val, tokens)
     else:
         # val is a type
+        if val.lower() in TYPES and val not in TYPES:
+            raise SyntaxError('invalid type: {}'.format(val))
         return read_declare(is_private, is_static, val, tokens)
 
 def read_class(is_private, tokens):
