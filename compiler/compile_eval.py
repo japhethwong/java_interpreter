@@ -12,10 +12,12 @@ def initialize(cls_name, num_args):
     """
     #TODO Still some stuff to do 
     # create an instance_obj
-    constructor = CLASSES[typ].constructors[num_args]
+    constructor = CLASSES[cls_name].constructors[num_args]
+    
     instance_obj = ExternalClass(CLASSES[cls_name])
-
-    return {'obj': instance_obj, 'constructor':constructor, 'args': str_paren}
+    body = get_const_body(constructor)
+    str_paren = process_params(constructor)
+    return {'obj': instance_obj, 'constructor':body, 'args': str_paren}
 
 def get_method(instance_obj, method_name, num_args):
     """
@@ -24,7 +26,21 @@ def get_method(instance_obj, method_name, num_args):
     typ = instance_obj.name
     return CLASSES[typ].methods[[method_name, num_args]]
 
+def process_params(const):
+    """
+    Helper function: changes constructor params from form
+    [('type', 'var1'), ('type', 'var2') ...] -> 
+    """
+    lst = []
+    for tup in const[0]:
+        lst.append(tup[0]+' '+ tup[1])
+    return lst 
 
+def get_const_body(const):
+    """
+    Helper function that returns the body of a constructor
+    """
+    return const[1]
 
 CLASSES = {} # {class_name : class}
 
@@ -139,9 +155,12 @@ class ExternalClass(object):
         self.methods = {}
         self.instance_attr = {}
         self.static_attr = {}
-   
-    ###README JOY!!!#####
-    def change_instance_attr(self, name, val):
+  
+        self._process_instance_attr(cls)
+        self._process_static_attr(cls)
+
+    ####README JOY!!!#####
+    def set_instance_attr(self, name, val):
         self.instance_attributes[name] = val
 
     def get_instance_attr(self, name):
@@ -150,14 +169,30 @@ class ExternalClass(object):
     def get_static_attr(self, name):
         return self.static_attr[name]
 
+    def get_instance_attributes(self):
+        return self.instance_attr
+
+    def get_static_attributes(self):
+        return self.static_attr
+
     def _populate_class(self, cls):
         self.methods = cls.methods
         self.instance_attr = cls.instance_attr
         self.static_attr = cls.static_attr
     ####################
 
+    def _process_instance_attr(self, cls):
+        for var in cls.instance_attr:
+            self.instance_attr[var] = evaluate_stuff #TODO
+
+    def _process_static_attr(self, cls):
+        for var in cls.static_attr:
+            self.static_attr[var] = evaluate_stuff #TODO
+
+    #TODO
     def _process_methods(self, cls):
-        methods = cls.methods
+        for method in cls.methods:
+
         
 
 
