@@ -19,7 +19,7 @@ unevaled = ''
 memory = []
 stack = [{}]
 instance_variables = {}
-prompt_types = {False: "java> ", True: "...  "}
+prompt_types = {False: "java> ", True: "...      "}
 continue_prompt = False
 
 def print_vars():
