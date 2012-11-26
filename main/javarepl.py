@@ -19,12 +19,12 @@ unevaled = ''
 memory = []
 stack = [{}]
 instance_variables = {}
-prompt_types = {False: "java> ", True: "...  "}
+prompt_types = {False: "java> ", True: "...      "}
 continue_prompt = False
 
 def print_vars():
     return
-    print("-------------Printing variables-------------")
+    print("-------------Printing variables------------")
     print("STACK: ", stack)
     print("STACK ID: ", id(stack))
     print("INSTANCE VARS", instance_variables)
@@ -51,13 +51,13 @@ def handle_constructor(exp_str, instance_env, exp_stack):
         raise InvalidConstructorException('too few fields')
     if tokens.pop(0) != 'new':
         raise InvalidConstructorException("'new' in wrong place")
-    if tokens.pop(2) != '(':
+    if tokens.pop(1) != '(':
         raise InvalidConstructorException("'(' in wrong place")
     if tokens.pop() != ')':
         raise InvalidConstructorException("')' in wrong place")
-        
+    
     exp_stack.append(dict())
-    #thing = initialize(tokens.pop(0), len(tokens))
+    thing = initialize(tokens.pop(0), len(tokens))
     
     #handle params
     for param in thing['args']:
@@ -76,6 +76,11 @@ def evaluate_expression(exp_str, instance_environment, exp_stack):
     # replace all variables with their values
     print_vars()
     "######################################"
+    
+    #handle constructor
+    if re.search('new\s*[A-Z][A-Za-z]*\(', exp_str):
+        return handle_constructor(exp_str, instance_environment, exp_stack)
+    
     if (re.search('[a-z]', exp_str)): # match potential variable names
         tokens = tokenize_one_expression(exp_str)
         for i, item in enumerate(tokens):
@@ -85,11 +90,6 @@ def evaluate_expression(exp_str, instance_environment, exp_stack):
                     #print("HERE2")
                     tokens[i] = str(variable_lookup(item, instance_environment, exp_stack).get_value())
         exp_str = " ".join(tokens)
-    
-    # handle constructor
-    if re.search('new\s*[A-Z][A-Za-z]*\(', exp_str):
-        return handle_constructor(exp_str)
-        
     
     for java_exp, python_exp in JAVA_TO_PYTHON.items():
         exp_str = exp_str.replace(java_exp, ' ' + python_exp + ' ')
@@ -249,7 +249,7 @@ def read_eval_print_loop():
     while True:
         try:
             parse_eval(input(prompt_types[continue_prompt]))
-        except (JavaException) as err:#, SyntaxError, TypeError, ZeroDivisionError) as err:
+        except (JavaException, SyntaxError, TypeError, ZeroDivisionError) as err:
             print(type(err).__name__ + ':', err)
         except (KeyboardInterrupt, EOFError):  # <Control>-D, etc.
             print('<(^ ^)>')
