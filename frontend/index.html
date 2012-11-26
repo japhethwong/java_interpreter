@@ -1,39 +1,34 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <link rel='stylesheet' type='text/css' href='style'>
-    <script type='text/javascript' src='jquery'></script>
-    <script type='text/javascript' src='compile-script'></script>
+    <link rel='stylesheet' type='text/css' href='style.css'>
+    <script type='text/javascript' src='jquery.js'></script>
+    <script type='text/javascript' src='compile-script.js'></script>
   </head>
   <body>
     <div id='header'>
-      <h1>Java Interpreter</h1>
-    </div>
-    <button id='compile-btn'>Compile</button></br>
-    <div class='class-panel'>
-      class <input type='text' name='class-name' value='Example'> {<br/>
-      <textarea class='fields' rows=5 cols=68>
-int x = 3;
-      </textarea>
-      <br/>
-      <div class='method-panel'>
-        public <input type='text' name='method-name0' size=10 value='int'><input type='text' name='method-name0' size=10 value='example'>(){
-        <br/>
-        <textarea id='method0' rows=5 cols=64>
-int x = 2;
-        </textarea>
-        <br/>
-        }
+      <div id='logo'>
+        <h1>Java Interpreter</h1>
       </div>
-      <br/>
-      <!--<button id='add-method-btn'>Add method</button><br/>-->
-      }
+      <div id='nav-bar'>
+        <ul>
+          <li><a href="">Option 1</a></li>
+          <li><a href="">Option 2</a></li>
+          <li><a href="">Option 3</a></li>
+        </ul>
+      </div>
     </div>
 
-    <div class='interpreter-panel'>
-      <textarea readonly cols=72 rows=20 id='interpreter-history'>
-      </textarea>
-      <p>Java&gt; <input type='text' name='interpreter-bar'></p>
+    <div class='container' id='main'>
+      <div class='container' id='compiler'>
+        <h2 class='container-label'>Compiler</h2>
+        <textarea class='terminal'>hello world</textarea>
+      </div>
+      <div class='container' id='interpreter'>
+        <h2 class='container-label'>Interpreter</h2>
+        <p id='output'></p>
+        <label>Java&gt; </label><input type='text' id='cmd-line'>
+      </div>
     </div>
 
   </body>

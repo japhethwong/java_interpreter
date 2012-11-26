@@ -5,15 +5,15 @@ from compile_eval import *
 def load():
     return static_file('index.html', root="./", mimetype='text/html')
 
-@route('/style')
+@route('/style.css')
 def css():
     return static_file('style.css', root='./', mimetype='text/css')
 
-@route('/jquery')
+@route('/jquery.js')
 def jquery():
     return static_file('jquery.js', root='./', mimetype='text/js')
 
-@route('/compile-script')
+@route('/compile-script.js')
 def compile_script():
     return static_file('compile.js', root='./', mimetype='text/js')
 
