@@ -1,9 +1,24 @@
 #! usr/bin/python3
+import sys
+sys.path.append(sys.path[0] + '/../')
 
-from compile_parse import *
+from compiler.compile_parse import *
 from variable import *
-from javarepl import parse_eval
+from javarepl import *  
 ### INTERFACE METHODS ####
+
+def compile(parsed_input):
+    """
+    Function called by the Online interface Parser
+    to create a list of External classes to send
+    to the interpreter.
+    """
+    for cls in parsed_input:
+        CLASSES[cls['name']] = InternalClass(cls)
+    output = []
+    for cls in CLASSES:
+        output.append(ExternalClass(CLASSES[cls]))
+    return output
 
 def initialize(cls_name, num_args):
     """
@@ -74,9 +89,9 @@ class InternalClass(object):
                 static = bool if attribute is static
         """
         if static: 
-            self.static_attr[name] = [typ, None]
+            self.static_attr[name] = [typ, ';']
         else:
-            self.instance_attr[name] = [typ, None]
+            self.instance_attr[name] = [typ, ';']
 
 
     def update_attribute(self, name, val):
@@ -196,13 +211,17 @@ class ExternalClass(object):
     def _process_instance_attr(self, cls): #TODO Check datatype
         for var in cls.instance_attr:
             typ = cls.instance_attr[var][0]
-            val = parse_eval(cls.instance_attr[var][1])
+            if cls.instance_attr[var][1] == None:
+                cls.instance_attr[var][1] = '0;'
+            val = parse_eval(cls.instance_attr[var][1],
+                        dict(), [dict()])
             self.instance_attr[var] = Variable(val, typ, var)
 
     def _process_static_attr(self, cls): #TODO
         for var in cls.static_attr:
             typ = cls.static_attr[var][0]
-            val = parse_eval(cls.static_attr[var][1])
+            val = parse_eval(cls.static_attr[var][1],
+                        dict(), [dict()])
             self.static_attr[var] = Variable(val, typ, var)
 
     def _process_methods(self, cls): #TODO
@@ -210,7 +229,6 @@ class ExternalClass(object):
             pass
               
     def print_fields(self):
-        print(self.name)
         print('INSTANCE ATTRIBUTES: \n {} \n'.format(self.instance_attr))
         print('STATIC ATTRIBUTES: \n {} \n'.format(self.static_attr))
 
@@ -223,21 +241,34 @@ if __name__ == '__main__':
     for c in input1:
         ic = InternalClass(c)
     print('Read_line: \n {} \n'.format(input1))
+    lst = []
     for cls in CLASSES.values():
         cls.print_fields() 
+        lst.append(ExternalClass(cls))
     print('Processing to InternalClass now:')
-    ic = ExternalClass(CLASSES.values()[0])
-    ic.print_fields()
-
+    for cls in lst:
+        cls.print_fields()
     reset_classes()
-    print(CLASSES)
+    
     code2 = 'class HelloWorld { public HelloWorld(String s, float y) { s = "hello"; y = 10.1; } void hello(){s;} double num(int x) { return x*y;}}'
+
     input2 = read_line(code2)
     for c in input2:
         ic = InternalClass(c)
-    print('Read_line: \n {} \n'.format(input2))
+    print('Read_line input2: \n {} \n'.format(input2))
+    lst = []
     for cls in CLASSES.values():
         cls.print_fields() 
+        lst.append(ExternalClass(cls))
     print('Processing to InternalClass now:')
-    ic = ExternalClass(CLASSES.values()[0])
-    ic.print_fields()
+    for cls in lst:
+        cls.print_fields()
+
+
+    reset_classes()
+    code3 = 'class Numbers { public Numbers(bool s, short r, long t) { s = true; r = 1332, t = 135 } static int w; double x = 32; String s = "numbers";}'
+
+    input3 = read_line(code3)
+    x = compile(input3)
+    for elem in x: 
+        elem.print_fields()

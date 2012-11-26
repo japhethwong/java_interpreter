@@ -1,5 +1,6 @@
 """constants"""
 DELIMITERS = {'(': ')', '{': '}'}
+SPACE = ['+','-','/','//','*', '<', '>', '=']
 JAVA_TO_PYTHON = {'||': 'or', '&&': 'and', 'true': 'True', 'false': 'False'}
 PYTHON_TO_JAVA = {val: key for key, val in JAVA_TO_PYTHON.items()}
 THING_TO_REPLACE = 'SIEHRIESHRESIHRESIRHES'
@@ -19,7 +20,8 @@ TYPES = [INT, FLOAT, DOUBLE, STRING, BOOLEAN, CHAR, SHORT, LONG]
 INT_TYPES = [INT, SHORT, LONG]
 FLOAT_TYPES = [FLOAT, DOUBLE]
 STRING_TYPES = [CHAR, STRING]
-KEYWORDS = TYPES + ['return', 'while', 'for'] + [key for key in JAVA_TO_PYTHON]+ [val for val in JAVA_TO_PYTHON.values()]
+KEYWORDS = TYPES + ['return', 'new'] + [key for key in JAVA_TO_PYTHON]+ [val for val in JAVA_TO_PYTHON.values()] \
+                    + CONTINUE_KEYWORDS
 
     
 UNDEFINED_PARAM = None

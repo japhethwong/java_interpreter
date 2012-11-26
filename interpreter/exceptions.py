@@ -24,12 +24,9 @@ class InvalidSystemCallException(JavaException):
 
 class InvalidIfElseBlockException(JavaException):
     pass
+    
+class InvalidConstructorException(JavaException):
+    pass
 
 class WhatTheHeckHappenedException(JavaException):
-    pass
-
-class InvalidWhileLoopException(JavaException):
-    pass
-
-class InvalidForLoopException(JavaException):
     pass

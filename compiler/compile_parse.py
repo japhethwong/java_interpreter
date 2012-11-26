@@ -2,7 +2,7 @@
 
 import re
 import sys
-from buffer import Buffer
+from compiler.buffer import Buffer
 
 MODIFIERS = ('public', 'protected', 'private')
 
