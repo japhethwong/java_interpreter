@@ -3,7 +3,7 @@ import sys
 sys.path.append(sys.path[0] + '/../')
 
 import re
-from compiler.buffer import Buffer
+from compiler.buffer import Buffer, PS1, interrupt
 
 MODIFIERS = ('public', 'protected', 'private')
 
@@ -360,9 +360,9 @@ def repl():
     """For testing purposes."""
     while True:
         try:
-            line = input("Java> ")
+            line = input(PS1)
         except KeyboardInterrupt:
-            print('\nExiting parser')
+            print(interrupt)
             exit(0)
         else:
             print(read_line(line))

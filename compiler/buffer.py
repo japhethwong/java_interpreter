@@ -3,7 +3,9 @@ DELIMS = ('{', '}',
           '(', ')',
           '[', ']',
           '=', ';', ',')
-prompt = '..... '
+PS1 = 'Jp> '
+PS2 = '    '
+interrupt = '\nExiting compiler'
 
 class Buffer:
     def __init__(self, line):
@@ -15,8 +17,13 @@ class Buffer:
         are no more tokens, raise an IndexError.
         """
         while len(self._tokens) == 0:
-            self._tokens = Buffer.tokenize(input(prompt))
-            self._tokens.reverse()
+            try:
+                self._tokens = Buffer.tokenize(input(PS2))
+            except KeyboardInterrupt:
+                print(interrupt)
+                exit(0)
+            else:
+                self._tokens.reverse()
         return self._tokens.pop()
 
     def current(self):
@@ -30,8 +37,13 @@ class Buffer:
         "Buffer(['int', 'x', '=', '3', ';'])"
         """
         while len(self._tokens) == 0:
-            self._tokens = Buffer.tokenize(input(prompt))
-            self._tokens.reverse()
+            try:
+                self._tokens = Buffer.tokenize(input(PS2))
+            except KeyboardInterrupt:
+                print(interrupt)
+                exit(0)
+            else:
+                self._tokens.reverse()
         return self._tokens[-1]
 
     def prepend(self, token):
