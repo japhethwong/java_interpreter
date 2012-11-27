@@ -223,6 +223,9 @@ def read_declare(is_private, is_static, datatype, tokens):
         tokens.pop()
         return read_method(is_private, is_static, datatype, 
                            name, tokens)
+    else:
+        raise SyntaxError("Unexpected token: {}".format(
+            tokens.current()))
     return Statement('declare',
                      name=name,
                      type=datatype,
@@ -231,9 +234,12 @@ def read_declare(is_private, is_static, datatype, tokens):
 
 def read_assign(name, tokens):
     """Reads a complete assignment statement."""
+    validate_name(name)
     value = []
     while tokens.current() != ';':
         value.append(tokens.pop())
+    if not value:
+        raise SyntaxError("No expression found on right side of =")
     value.append(tokens.pop())
     return Statement('assign',
                      name=name,
@@ -264,6 +270,7 @@ def read_method(is_private, is_static, datatype, name, tokens):
       'static':  True if method is static
       }
     """
+    validate_name(name)
     args = parse_args(tokens)
     body = parse_body(tokens)
     return Statement('method',
@@ -328,9 +335,10 @@ def parse_args(tokens):
         datatype = tokens.pop()
         validate_name(tokens.current())
         args.append((datatype, tokens.pop()))
-    if tokens.current() != ')' and tokens.current() != '{':
-        raise SyntaxError("method declaration is invalid")
-    tokens.pop(); tokens.pop()
+    if tokens.pop() != ')':
+        raise SyntaxError("expected )")
+    if tokens.pop() != '{':
+        raise SyntaxError("expected {")
     return args
 
 def parse_body(tokens):
