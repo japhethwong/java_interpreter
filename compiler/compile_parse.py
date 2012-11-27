@@ -1,13 +1,36 @@
 #! /usr/bin/python3
+import sys
+sys.path.append(sys.path[0] + '/../')
 
 import re
-import sys
 from compiler.buffer import Buffer
 
 MODIFIERS = ('public', 'protected', 'private')
 
 class Statement:
+    """A wrapper class for Java statements.
+
+    DESCRIPTION:
+    Each Statement object has a 'type', which can be one of the
+    following strings:
+        - class
+        - assign
+        - declare
+        - method
+        - constructor
+    The 'type' can be referenced as an instance attribute (e.g. 
+    'stmt.type').
+
+    Statement objects can be indexed like dictionaries -- through keys
+    and values.
+    """
     def __init__(self, stmt_type, **kargs):
+        """Constructor.
+
+        ARGUMENTS:
+        stmt_type -- the type of statement
+        kargs     -- keyword arguments
+        """
         self._type = stmt_type
         self.kargs = kargs
 
@@ -287,6 +310,7 @@ def parse_args(tokens):
         validate_name(tokens.current())
         args.append((datatype, tokens.pop()))
     while tokens.current() == ',':
+        tokens.pop()
         validate_name(tokens.current())
         datatype = tokens.pop()
         validate_name(tokens.current())
