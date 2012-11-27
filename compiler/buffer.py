@@ -1,3 +1,13 @@
+"""
+buffer.py
+
+Buffer data structure for the compiler module of the Java 
+Interpreter. 
+
+Authors: Albert Wu
+
+This file is designed to run on python3
+"""
 
 DELIMS = ('{', '}',
           '(', ')',

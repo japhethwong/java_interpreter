@@ -1,5 +1,18 @@
 #! /usr/bin/python3
 
+"""
+compile_eval.py
+
+Evaluator for the compiler module of the Java Interpreter.
+Interface documentation can be found in README.txt in the compiler
+directory.
+
+Authors: Brian Yin
+         Albert Wu
+
+This file is designed to run on python3
+"""
+
 import sys
 sys.path.append(sys.path[0] + '/../')
 
@@ -7,8 +20,6 @@ from compiler.buffer import Buffer, PS1, interrupt
 from compiler.compile_parse import read_line, read_statement
 
 
-
-CLASSES = {} # {class_name : class}
 
 #####################
 # INTERFACE METHODS #
@@ -29,10 +40,11 @@ def load(src):
     except IOError as e:
         raise IOError('cannot find file {}'.format(src))
     parsed = read_line(f.read().replace("\n", " "))
+    classes = {}
     for cls in parsed:
         assert cls.type == 'class', 'not a class'
-        CLASSES[cls['name']] = ClassObj(cls)
-    return CLASSES
+        classes[cls['name']] = ClassObj(cls)
+    return classes
 
 
 ###################
@@ -61,7 +73,9 @@ class Method:
     def __init__(self, name, datatype, args, body):
         self.name = name
         self.type = datatype
-        self.args = args
+        self.args = []
+        for arg in args:
+            self.args.append(Variable(arg[1], arg[0]))
         self.body = body
 
     def is_constructor(self):
@@ -74,7 +88,7 @@ class Method:
         else:
             s = "{type} {name}(".format(type=self.type, name=self.name)
         for arg in self.args:
-            s += "{}, ".format(arg[0])
+            s += "{}, ".format(arg.type)
         return s[:-2] + ")"
 
 
@@ -211,20 +225,16 @@ class ClassObj:
 # TESTING #
 ###########
 
-def test1(reset=True):
+def test1():
     """Test suite 1"""
-    if reset:
-        global CLASSES
-        CLASSES = {}
-
     print("----- Test Suite 1 -----")
-    print("-- Test 1 --")
+    print("-- 1.1 --")
     b1 = Buffer("class Ex { int x = 3; }")
     s1 = read_statement(b1)
     c1 = ClassObj(s1)
     print(c1)
 
-    print("-- Test 2 --")
+    print("-- 1.2 --")
     b2 = Buffer("class Ex { int x = 3; int x; }")
     s2 = read_statement(b2)
     try:
@@ -234,7 +244,7 @@ def test1(reset=True):
     else:
         print("Did not raise SyntaxError: " + str(e)) + "\n"
 
-    print("-- Test 3 --")
+    print("-- 1.3 --")
     b3 = Buffer("""class Ex { int foo(String x) {}
                 double foo(String x, int y) {}  }""")
     s3 = read_statement(b3)

@@ -1,4 +1,17 @@
 #! /usr/bin/python3
+
+"""
+compile_parse.py
+
+Parser for the compiler module of the Java Interpreter.
+Interface documentation can be found in README.txt in the compiler
+directory.
+
+Authors: Albert Wu
+
+This file is designed to run on python3
+"""
+
 import sys
 sys.path.append(sys.path[0] + '/../')
 
