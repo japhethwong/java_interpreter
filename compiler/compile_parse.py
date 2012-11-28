@@ -19,6 +19,11 @@ import re
 from compiler.buffer import Buffer, PS1, interrupt
 
 MODIFIERS = ('public', 'protected', 'private')
+CLASS = 'class'
+DECLARE = 'declare'
+ASSIGN = 'assign'
+METHOD = 'method'
+CONSTRUCTOR = 'constructor'
 
 class Statement:
     """A wrapper class for Java statements.
@@ -115,13 +120,13 @@ def read_statement(tokens):
     A dictionary with key-value pairs specific to each type of
     statement.
     - Class:
-        {'op': 'class', 'name': string, 'body': list of dicts}
+        {'op': CLASS, 'name': string, 'body': list of dicts}
     - Field Declaration:
-        {'op': 'declare', 'name': string, 'type': string}
+        {'op': DECLARE, 'name': string, 'type': string}
     - Field Assignement:
-        {'op': 'assign', 'name': string, 'value': TODO}
+        {'op': ASSIGN, 'name': string, 'value': TODO}
     - Method Declaration:
-        {'op': 'method', 'name': string, 'type': string, 
+        {'op': METHOD, 'name': string, 'type': string, 
          'args': list of pairs, 'body': TODO}
 
     >>> test_read_statement()
@@ -161,7 +166,7 @@ def read_class(is_private, tokens):
 
     RETURNS:
     A dictionary with the following key-value pairs:
-    { 'op':      'class'
+    { 'op':      CLASS
       'name':    name, string
       'body':    body, string
       'super':   superclass, string if exists, None otherwise
@@ -181,7 +186,7 @@ def read_class(is_private, tokens):
     while tokens.current() != '}':
         exp.append(read_statement(tokens))
     tokens.pop()
-    return Statement('class',
+    return Statement(CLASS,
                     name=name,
                     body=exp,
                     super=superclass,
@@ -201,7 +206,7 @@ def read_declare(is_private, is_static, datatype, tokens):
 
     RETURNS:
     The following dictionary:
-    { 'op':      'declare'
+    { 'op':      DECLARE
       'name':    name, string
       'type':    type, string
       'private': True if field is private, False otherwise
@@ -226,7 +231,7 @@ def read_declare(is_private, is_static, datatype, tokens):
     else:
         raise SyntaxError("Unexpected token: {}".format(
             tokens.current()))
-    return Statement('declare',
+    return Statement(DECLARE,
                      name=name,
                      type=datatype,
                      private=is_private,
@@ -241,7 +246,7 @@ def read_assign(name, tokens):
     if not value:
         raise SyntaxError("No expression found on right side of =")
     value.append(tokens.pop())
-    return Statement('assign',
+    return Statement(ASSIGN,
                      name=name,
                      value=" ".join(value))
 
@@ -261,7 +266,7 @@ def read_method(is_private, is_static, datatype, name, tokens):
 
     RETURNS:
     The following dictionary:
-    { 'op':      'method'
+    { 'op':      METHOD
       'name':    name, string
       'type':    type, string
       'args':    parameters, list of pairs (tuples)
@@ -273,7 +278,7 @@ def read_method(is_private, is_static, datatype, name, tokens):
     validate_name(name)
     args = parse_args(tokens)
     body = parse_body(tokens)
-    return Statement('method',
+    return Statement(METHOD,
                      name=name,
                      type=datatype,
                      args=args,
@@ -295,7 +300,7 @@ def read_constructor(is_private, datatype, tokens):
 
     RETURNS:
     The following dictionary:
-    { 'op':      'constructor'
+    { 'op':      CONSTRUCTOR
       'name':    name, string (eval should check this matches class)
       'args':    args, list of pairs (tuples)
       'body':    body, string
@@ -303,7 +308,7 @@ def read_constructor(is_private, datatype, tokens):
     """
     args = parse_args(tokens)
     body = parse_body(tokens)
-    return Statement('constructor',
+    return Statement(CONSTRUCTOR,
                      name=datatype,
                      args=args,
                      body=body,
@@ -397,26 +402,4 @@ if __name__ == '__main__':
     if len(sys.argv) == 2:
         print(load(sys.argv[1]))
     repl()
-
-def test_read_statement():
-    test1 = read_statement(Buffer('class Ex {}'))
-    assert test1.type == 'class', 'test1 failed'
-    assert test1['name'] == 'Ex', 'test1 failed'
-    assert test1['body'] == [], 'test1 failed'
-
-    test2 = read_statement(Buffer('int x;'))
-    assert test2.type ==  'declare', 'test2 failed'
-    assert test2['name'] == 'x', 'test2 failed'
-    assert test2['type'] == 'int', 'test2 failed'
-
-    test3 = read_statement(Buffer('x = 4;'))
-    assert test3.type == 'assign', 'test3 failed'
-    assert test3['name'] == 'x', 'test3 failed'
-    assert test3['value'] == '4 ;', 'test3 failed'
-
-    test4 = read_statement(Buffer('int foo() {}'))
-    assert test4.type == 'method', 'test4 failed'
-    assert test4['name'] == 'foo', 'test4 failed'
-    assert test4['args'] == [], 'test4 failed'
-    assert test4['body'] == '', 'test4 failed'
 

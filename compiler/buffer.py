@@ -11,7 +11,6 @@ This file is designed to run on python3
 
 DELIMS = ('{', '}',
           '(', ')',
-          '[', ']',
           '=', ';', ',')
 PS1 = 'Jp> '
 PS2 = '    '
