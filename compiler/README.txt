@@ -10,12 +10,13 @@ compile_eval.py
 *----- CONTENTS -----*
 - Interface
     - load
-    - Variable
-    - Method
-    - ClassObj
 - Testing
-    - Suite 1
-    - Interactive
+    - Parser
+        - parse_test
+        - Interactive
+    - Evaluator
+        - Interactive
+        - .java files
     
 
 *----- INTERFACE -----*
@@ -32,55 +33,22 @@ load(src)
                                   classes
     NOTES:      None
 
-Variable
-    TYPE:       class
-    FUNCTION:   Wrapper class for variables and their values. Holds 
-                info on 
-                - name       (string)
-                - datatype   (string)
-                - value      (string)   
-                - protection (boolean)
-                - static     (boolean)
-    PURPOSE:    Intended as an abstract data type
-    METHODS:    self.__str__()
-                    returns human-readable format as string
-    NOTES:      None
-
-Method
-    TYPE:       class
-    FUNCTION:   Wrapper class for methods. Holds info on
-                - name      (string)
-                - datatype  (string)
-                - arguments (list of Variable objects)
-                - body      (string)
-    PURPOSE:    Intended as an abstract data type
-    METHODS:    self.is_constructor()
-                    returns True if self is a constructor, False
-                            otherwise
-                self. __str__()
-                    returns human-readable format as string
-    NOTES:      None
-
-ClassObj
-    TYPE:       class
-    FUNCTION:   Wrapper class for Class objects. Holds info on
-                - name                (string)
-                - protection          (boolean)
-                - superclass          (string)
-                - instance attributes (dictionary of Variable objects)
-                - methods             (dictionary of Method objects)
-                - constructors        (dictionary of Method objects)
-    PURPOSE:    Intended as an abstract data type
-    METHODS:    self. __str__()
-                    returns human-readable format as string
-    NOTES:      None
-
 
 *----- TESTING -----*
-Suite 1
-    TO CALL:    from command line:
-                    python3 compile_eval.py -t
+Parser:
+    parse_test:
+                Contains several test suites for compile_parse. Run
+                with
+                    python3 parse_test.py
+    Interactive:
+                Test cases interactively with parser repl. Run with
+                    python3 compile_parse.py
 
-Interactive
-    TO CALL:    from command line:
+Evaluator
+    Interactive:
+                Test cases interactively with evaluator repl. Run with
                     python3 compile_eval.py
+    .java files:
+                Compiles a specified .java file. Run with
+                    python3 compile_eval.py <file>.java
+
