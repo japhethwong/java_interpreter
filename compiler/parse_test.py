@@ -39,6 +39,7 @@ def assert_equal(actual, expected):
         raise AssertionError('should be {}, not {}'.format(expected,
             actual))
 
+
 def statement_test():
     print("*---- Statement Test ----*")
 

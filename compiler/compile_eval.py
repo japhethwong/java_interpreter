@@ -20,7 +20,7 @@ from compiler.buffer import Buffer, PS1, interrupt
 from compiler.compile_parse import read_line, read_statement, CLASS, \
                                    DECLARE, ASSIGN, METHOD, CONSTRUCTOR
 
-from interface.primitives import Variable, Method, ClassObj
+from interface.structures import Variable, Method, ClassObj
 
 #####################
 # INTERFACE METHODS #
