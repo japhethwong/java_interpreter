@@ -16,6 +16,7 @@ structures.py:
     - ClassObj
     - Instance
 - Testing
+    - struct_test
     
 
 *----- INTERFACE -----*
@@ -91,4 +92,8 @@ Instance:
     
 
 *----- TESTING -----*
+Data Structures:
+    struct_test:
+                Contains several test suites for structures. Run with
+                    python3 struct_test.py
 
