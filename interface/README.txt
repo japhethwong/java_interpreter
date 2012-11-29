@@ -4,7 +4,9 @@ Author: Albert Wu
 
 *----- GENERAL -----*
 All interface functions and classes can be imported from the file
-primitives.py
+structures.py:
+    
+    from structures import *
 
 
 *----- CONTENTS -----*
@@ -12,6 +14,7 @@ primitives.py
     - Variable
     - Method
     - ClassObj
+    - Instance
 - Testing
     
 
@@ -26,7 +29,9 @@ Variable
                 - protection (boolean)
                 - static     (boolean)
     PURPOSE:    Intended as an abstract data type
-    METHODS:    self.__str__()
+    METHODS:    self.clone()
+                    returns a new Variable with identical fields
+                self.__str__()
                     returns human-readable format as string
     NOTES:      None
 
@@ -66,6 +71,24 @@ ClassObj
                     returns human-readable format as string
     NOTES:      None
 
+Instance:
+    TYPE:       class
+    FUNCTION:   Wrapper class for Instance objects. Holds info on
+                - name                (string)
+                - instance attributes (dictionary of Variable objects)
+    PURPOSE:    Intended as an abstract data type
+    METHODS:    self.getattr(name)
+                    returns the Variable object that is referenced by
+                            name
+                self.setattr(name, value)
+                    sets the instance variable to the VALUE
+                self.get_method(name, num_args)
+                    returns the Method object that is referenced by
+                            NAME and NUM_ARGS
+                self. __str__()
+                    returns human-readable format as string
+    NOTES:      getattr and setattr can be used with index notation
+    
 
 *----- TESTING -----*
 

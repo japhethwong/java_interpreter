@@ -25,6 +25,10 @@ ASSIGN = 'assign'
 METHOD = 'method'
 CONSTRUCTOR = 'constructor'
 
+###################
+# DATA STRUCTURES #
+###################
+
 class Statement:
     """A wrapper class for Java statements.
 
@@ -76,6 +80,10 @@ class Statement:
         return "Statement({}, {})".format(repr(self.type), 
                                             repr(self.kargs))
 
+
+##########
+# PARSER #
+##########
 
 def validate_name(name):
     """Determines if NAME is a valid identifier. 
@@ -370,6 +378,11 @@ def parse_body(tokens):
         body.append(val)
     body = " ".join(body[:-1])
     return body
+
+
+#############
+# INTERFACE #
+#############
 
 def read_line(line):
     """Main method to call for the compiler's parser.

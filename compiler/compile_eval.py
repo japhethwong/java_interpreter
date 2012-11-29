@@ -26,7 +26,6 @@ from interface.primitives import Variable, Method, ClassObj
 # INTERFACE METHODS #
 #####################
 
-
 def load(src):
     """Loads a .java file into the Java interpreter. This method will
     compile the Java code into a format that is understandable by
@@ -46,6 +45,11 @@ def load(src):
         assert cls.type == CLASS, 'not a class'
         classes[cls['name']] = eval_class(cls)
     return classes
+
+
+########################
+# EVALUATION FUNCTIONS #
+########################
 
 
 def eval_class(stmt):
@@ -80,7 +84,7 @@ def eval_declare(cls, expr):
     SyntaxError -- if the identifier has already been defined
     """
     assert expr.type == DECLARE, 'Not a valid declare: {}'.format(expr)
-    var = Variable(expr['name'], expr['type'], expr['static'], expr['type'])
+    var = Variable(expr['name'], expr['type'], expr['static'], expr['private'])
     cls.declare_var(var)
 
 
@@ -157,6 +161,10 @@ def test1():
     c3 = ClassObj(s3)
     print(c3)
 
+
+################
+# COMMAND LINE #
+################
 
 def repl():
     """For interactive testing purposes"""

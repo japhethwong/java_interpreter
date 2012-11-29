@@ -3,8 +3,10 @@ This is the README for the compiler module of the Java Interpreter.
 Author: Albert Wu
 
 *----- GENERAL -----*
-All interface functions and classes can be imported from the file
-compile_eval.py
+All interface functions and classes used by other modules can be 
+imported from the file compile_eval.py:
+
+    from compiler.compile_eval import load
 
 
 *----- CONTENTS -----*
