@@ -17,13 +17,12 @@ sys.path.append(sys.path[0] + '/../')
 
 import re
 from compiler.buffer import Buffer, PS1, interrupt
+from interface.exceptions import CompileException
 
 MODIFIERS = ('public', 'protected', 'private')
 CLASS = 'class'
-DECLARE = 'declare'
-ASSIGN = 'assign'
+VARIABLE = 'variable'
 METHOD = 'method'
-CONSTRUCTOR = 'constructor'
 
 ###################
 # DATA STRUCTURES #
@@ -34,12 +33,10 @@ class Statement:
 
     DESCRIPTION:
     Each Statement object has a 'type', which can be one of the
-    following strings:
-        - class
-        - assign
-        - declare
-        - method
-        - constructor
+    following:
+        - CLASS
+        - VARIABLE
+        - METHOD
     The 'type' can be referenced as an instance attribute (e.g. 
     'stmt.type').
 
@@ -108,7 +105,7 @@ def validate_name(name):
     SyntaxError: invalid identifier: '9h3110'
     """
     if not re.match("[a-zA-Z][\w]*$", name):
-        raise SyntaxError("invalid identifier: '{}'".format(name))
+        raise CompileException("invalid identifier: '{}'".format(name))
     
 def read_statement(tokens):
     """Reads a complete Java statement and pops it off TOKENS.
@@ -120,26 +117,30 @@ def read_statement(tokens):
     - a field declaration
         "int x;"
     - a field assignment
-        "x = 4 + 3"
+        "int x = 4 + 3"
     - a method declaration
         "int example(arg) { // body of method }"
+    - a constructor declaration
+        "Ex(String x) { // body of constructor }"
 
     RETURNS:
-    A dictionary with key-value pairs specific to each type of
-    statement.
+    A Statement object:
     - Class:
-        {'op': CLASS, 'name': string, 'body': list of dicts}
+        type: CLASS, name: string, body: list of Statements
     - Field Declaration:
-        {'op': DECLARE, 'name': string, 'type': string}
+        type: VARIABLE, name: string, type: string, value: None
     - Field Assignement:
-        {'op': ASSIGN, 'name': string, 'value': TODO}
+        type: VARIABLE, name: string, type: string, 
+        value: Statement(EXPR)
     - Method Declaration:
-        {'op': METHOD, 'name': string, 'type': string, 
-         'args': list of pairs, 'body': TODO}
-
-    >>> test_read_statement()
+        type: METHOD, name: string, datatype: string,
+        args:  list of pairs, body: list of Statements
+    - Constructor Declaration:
+        type: METHOD, name: string, datatype: None,
+        args:  list of pairs, body: list of Statements
     """
     val = tokens.pop()
+
     is_private = False
     if val.lower() in MODIFIERS:
         is_private = val == 'private'
@@ -151,14 +152,12 @@ def read_statement(tokens):
         val = tokens.pop()
         
     if val == 'class':
+        if is_static:
+            raise CompileException('invalid modifier for class: static')
         return read_class(is_private, tokens)
-
-    elif tokens.current() == '=':
-        # val is a field name
-        tokens.pop()
-        return read_assign(val, tokens)
     else:
-        # val is a type
+        # val is expected to be a type declaration
+        validate_name(val)
         return read_declare(is_private, is_static, val, tokens)
 
 def read_class(is_private, tokens):
@@ -170,20 +169,19 @@ def read_class(is_private, tokens):
 
     ARGUMENTS:
     is_private -- True if class is private, False otherwise
-    tokens     -- a list of tokens
+    tokens     -- a Buffer of tokens
 
     RETURNS:
-    A dictionary with the following key-value pairs:
-    { 'op':      CLASS
-      'name':    name, string
-      'body':    body, string
-      'super':   superclass, string if exists, None otherwise
-      'private': True if modifier is private, False otherwise
-    }
+    A Statement object with the following attributes:
+        type:   CLASS
+        name:   string
+        body:   list of Statements
+        super:  string, 'Object' if none provided
+        private: boolean
     """
     name = tokens.pop()
     validate_name(name)
-    superclass = None
+    superclass = 'Object' # TODO don't hardcode this?
     if tokens.current() == 'extends':
         tokens.pop()
         superclass = tokens.pop()
@@ -194,23 +192,29 @@ def read_class(is_private, tokens):
     while tokens.current() != '}':
         exp.append(read_statement(tokens))
     tokens.pop()
-    return Statement(CLASS,
-                    name=name,
-                    body=exp,
-                    super=superclass,
+    return Statement(CLASS, name=name, body=exp, super=superclass,
                     private=is_private)
 
 def read_declare(is_private, is_static, datatype, tokens):
     """Reads a complete field declaration.
     
     DESCRIPTION:
-    A valid field declaration has the following syntax:
-        [modifier] [static] [type] [name] ;
+    The following are valid declarations:
+        Variable:
+            [modifier] [static] [type] [name] ;
+            [modifier] [static] [type] [name] = [value] ;
+            [modifier] [static] [type] [name1], [name2], ...;
+            [modifier] [static] [type] [name1] = [value1], ...;
+        Method:
+            [modifier] [static] [type] [name] ( [type1] [arg1], ...) {}
+        Constructor:
+            [modifier] [static] [class name] ( [type1] [arg1], ...) {}
 
     ARGUMENTS:
     is_private -- True if field is private, False otherwise
+    is_static  -- True if the field is static, False otherwise
     datatype   -- a string, the type of variable
-    tokens     -- list of tokens
+    tokens     -- Buffer of tokens
 
     RETURNS:
     The following dictionary:
@@ -223,40 +227,51 @@ def read_declare(is_private, is_static, datatype, tokens):
     """
     name = tokens.pop()
     if name == '(':
-        if is_static:
-            raise SyntaxError("Constructor can't be static")
-        return read_constructor(is_private, datatype, tokens)
-
+        # expect it to be a constructor
+        return read_method(is_private, is_static, None, datatype, 
+                tokens)
     validate_name(name)
-    if tokens.current() == ';':
-        tokens.pop()
-    elif tokens.current() == '=':
-        tokens.prepend(name)
-    elif tokens.current() == '(':
-        tokens.pop()
+    
+    next_token = tokens.pop()
+    if next_token == '(':
         return read_method(is_private, is_static, datatype, 
                            name, tokens)
+    elif next_token == '=':
+        result = read_assign(datatype, name, tokens)
+        next_token = tokens.pop()
     else:
-        raise SyntaxError("Unexpected token: {}".format(
-            tokens.current()))
-    return Statement(DECLARE,
-                     name=name,
-                     type=datatype,
-                     private=is_private,
-                     static=is_static)
+        result = Statement(VARIABLE, name=name, datatype=datatype, 
+                private=is_private, static=is_static, value=None)
 
-def read_assign(name, tokens):
-    """Reads a complete assignment statement."""
+    if next_token == ',':
+        tokens.prepend(datatype)
+        if is_static:
+            tokens.prepend('static')
+        if is_private:
+            tokens.prepend('private')
+        return result
+    elif next_token == ';':
+        return result
+    else:
+        raise SyntaxError("Unexpected token: {}".format(next_token))
+
+def read_assign(datatype, name, tokens):
+    """Reads a complete assignment statement.
+    
+    DESCRIPTION:
+    TOKENS is assumed to be begin with the expression on the right
+    side of an '=' sign. READ_ASSIGN will parse the expression until
+    it reaches a ',' or a ';', but will not pop off the delimiter.
+    """
     validate_name(name)
-    value = []
-    while tokens.current() != ';':
-        value.append(tokens.pop())
-    if not value:
-        raise SyntaxError("No expression found on right side of =")
-    value.append(tokens.pop())
-    return Statement(ASSIGN,
-                     name=name,
-                     value=" ".join(value))
+    value = read_expr(tokens)
+    return Statement(VARIABLE, datatype=datatype, name=name, 
+            value=value)
+
+def read_expr(tokens):
+    # TODO go until , or ; but don't pop it off
+    pass
+
 
 def read_method(is_private, is_static, datatype, name, tokens):
     """Reads a method declaration.
@@ -270,58 +285,25 @@ def read_method(is_private, is_static, datatype, name, tokens):
     is_static  -- True if the method is static, False otherwise
     datatype   -- type, string
     name       -- name, string
-    tokens     -- list of tokens
+    tokens     -- Buffer of tokens
 
     RETURNS:
-    The following dictionary:
-    { 'op':      METHOD
-      'name':    name, string
-      'type':    type, string
-      'args':    parameters, list of pairs (tuples)
-      'body':    body of method, string
-      'private': True if method is private
-      'static':  True if method is static
-      }
+    A Statement object with the following attributes:
+        type:       CLASS
+        name:       string, name of the method, or name of class if 
+                    constructor
+        datatype    string if method, None if constructor
+        args        list of pairs
+        body        a single string
+        private     True if method is private
+        static      True if method is static
     """
     validate_name(name)
     args = parse_args(tokens)
     body = parse_body(tokens)
-    return Statement(METHOD,
-                     name=name,
-                     type=datatype,
-                     args=args,
-                     body=body,
-                     private=is_private,
-                     static=is_static)
+    return Statement(METHOD, name=name, datatype=datatype, args=args,
+                     body=body, private=is_private, static=is_static)
     
-def read_constructor(is_private, datatype, tokens):
-    """Reads a constructor declaration.
-
-    DESCRIPTION:
-    A valid constructor declaration has the following syntax:
-        [modifier] [type] ([type1] [arg1], ...) { [body] }
-
-    ARGUMENTS:
-    is_private -- True if the constructor is private, False otherwise
-    datatype   -- name of the constructor
-    tokens     -- list of tokens
-
-    RETURNS:
-    The following dictionary:
-    { 'op':      CONSTRUCTOR
-      'name':    name, string (eval should check this matches class)
-      'args':    args, list of pairs (tuples)
-      'body':    body, string
-      'private': True if constructor is private, False otherwise }
-    """
-    args = parse_args(tokens)
-    body = parse_body(tokens)
-    return Statement(CONSTRUCTOR,
-                     name=datatype,
-                     args=args,
-                     body=body,
-                     private=is_private)
-
 def parse_args(tokens):
     """Subroutine used to parse arguments.
 
@@ -404,7 +386,9 @@ def repl():
             print(interrupt)
             exit(0)
         else:
-            print(read_line(line))
+            result = read_line(line)
+            for stmt in result:
+                print(stmt)
 
 def load(path):
     with open(path, 'r') as f:
