@@ -269,7 +269,20 @@ def read_assign(datatype, name, tokens):
             value=value)
 
 def read_expr(tokens):
+    """Reads an expression.
+
+    3 + 4
+    3 + 4 * 5
+    (3 + 4) * 5
+    3 + x
+    x + x
+    x.method()
+    x.method(arg)
+    x + y.method(arg)
+    Ex(arg)
+    """
     # TODO go until , or ; but don't pop it off
+    
     pass
 
 

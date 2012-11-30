@@ -18,7 +18,7 @@ sys.path.append(sys.path[0] + '/../')
 
 from compiler.buffer import Buffer, PS1, interrupt
 from compiler.compile_parse import read_line, read_statement, CLASS, \
-                                   DECLARE, ASSIGN, METHOD, CONSTRUCTOR
+                                   VARIABLE, METHOD
 
 from interface.structures import Variable, Method, ClassObj
 
@@ -64,17 +64,13 @@ def eval_class(stmt):
     cls.superclass(stmt['super'])
     for expr in stmt['body']:
         op = expr.type
-        if op == DECLARE:
-            eval_declare(cls, expr)
-        elif op == ASSIGN:
-            eval_assign(cls, expr)
+        if op == VARIABLE:
+            eval_variable(cls, expr)
         elif op == METHOD:
             eval_method(cls, expr)
-        elif op == CONSTRUCTOR:
-            eval_constructor(cls, expr)
     return cls
 
-def eval_declare(cls, expr):
+def eval_variable(cls, expr):
     """Subroutine for declaring instance variables.
 
     ARGUMENTS:
@@ -83,22 +79,11 @@ def eval_declare(cls, expr):
     RAISES:
     SyntaxError -- if the identifier has already been defined
     """
-    assert expr.type == DECLARE, 'Not a valid declare: {}'.format(expr)
-    var = Variable(expr['name'], expr['type'], expr['static'], expr['private'])
+    assert expr.type == VARIABLE, 'Not a valid var: {}'.format(expr)
+    var = Variable(expr['datatype'], expr['name'], expr['value'], 
+            expr['static'], expr['private'])
     cls.declare_var(var)
 
-
-def eval_assign(cls, expr):
-    """Subroutine for assigning values to variables.
-
-    ARGUMENTS:
-    expr -- a Statement object, guaranteed to be of type 'assign'
-
-    RAISES:
-    SyntaxError -- if the identifier has not been defined
-    """
-    assert expr.type == ASSIGN, 'Not a valid assign: {}'.format(expr)
-    cls.assign_var(expr['name'], expr['value'])
 
 def eval_method(cls, expr):
     """Subroutine for defining methods.
@@ -113,23 +98,10 @@ def eval_method(cls, expr):
                    defined
     """
     assert expr.type == METHOD, 'Not a valid method: {}'.format(expr)
-    cls.declare_method(Method(expr['name'], expr['type'], expr['args'],
-                              expr['body']))
+    is_constructor = expr['name'] == cls.name;
+    cls.declare_method(Method(None if is_constructor else expr['name'],
+        expr['datatype'], expr['args'], expr['body']))
 
-def eval_constructor(cls, expr):
-    """Subroutine for defining constructors.
-
-    DESCRIPTION:
-    Constructors are represented as Method objects whose name
-    and type attributes are None.
-
-    RAISES:
-    TypeError -- a constructor name that doesn't match the class
-                 name
-    """
-    assert expr.type == CONSTRUCTOR, 'Not a valid constructor: {}'.format(expr)
-    cls.declare_constructor(Method(None, None, expr['args'],
-                                   expr['body']))
 
 ###########
 # TESTING #

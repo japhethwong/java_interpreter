@@ -15,9 +15,11 @@ Authors: Albert Wu
 this file is designed to run on python3
 """
 
+from interface.exceptions import CompileException
+
 class Variable:
     """Wrapper class for variable definitions."""
-    def __init__(self, name, datatype, static=False, private=False):
+    def __init__(self, datatype, name, value, static=False, private=False):
         self.name = name
         self.type = datatype
         self.static = static
@@ -44,7 +46,7 @@ class Method:
         self.type = datatype
         self.args = []
         for arg in args:
-            self.args.append(Variable(arg[1], arg[0]))
+            self.args.append(Variable(arg[0], arg[1], None))
         self.body = body
 
     def is_constructor(self):
@@ -87,26 +89,21 @@ class ClassObj:
         self.instance_attr[var.name] = var
 
 
-    def assign_var(self, var_name, value):
-        """Subroutine used to assign values to variables."""
-        if var_name not in self.instance_attr:
-            raise SyntaxError(var_name + ' not defined')
-        self.instance_attr[var_name].value = value
-
     def declare_method(self, method):
         """Subroutine used to declare a method."""
-        key = (method.name, len(method.args))
-        if key in self.methods:
-            raise SyntaxError(method.name + ' has already been ' + \
-                              'defined with {} arguments'.format(
-                                  len(method.args)))
-        self.methods[key] = method
+        num_args = len(method.args)
+        if method.is_constructor():
+            if num_args in self.constructors:
+                raise CompileException('Constructor with {} args already declared'.format(num_args))
+            self.constructors[num_args] = method
+        else:
+            key = (method.name, num_args)
+            if key in self.methods:
+                raise CompileException(method.name + \
+                        ' has already been ' + \
+                        'defined with {} arguments'.format(num_args))
+            self.methods[key] = method
 
-    def declare_constructor(self, constructor):
-        """Subroutine used to declare constructors."""
-        if not constructor.is_constructor:
-            raise TypeError("Not a valid constructor")
-        self.constructors[len(constructor.args)] = constructor
 
     def private(self, state=None):
         """Deals with protection modifier of class.
