@@ -1,20 +1,20 @@
 body {
     margin:0;
     font-size:100%;
-    font-family:monotype;
+    font-family:sans-serif;
 }
 
 div#header {
-    min-height:110px;
+    min-height:120px;
     min-width:1000px;
-    background-color:#222222;
     color:#dddddd;
+    background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, #555555), color-stop(0.7, #222222));
 }
 
 div#logo {
     position:absolute;
     padding:0 5%;
-    top:5px;
+    top:10px;
 }
 
 #logo h1 {
@@ -64,45 +64,36 @@ h2.container-label {
 }
 
 div#main {
-    min-width:1000px;
+    min-width:90%;
 }
 
 div#main div {
-    margin:0 5%;
-    font-family:courier, monotype;
+    margin:0 2.5%;
 }
 
 div#compiler {
     position:absolute;
-    margin:0 5%;
+    width:45%;
 }
 
 div#interpreter {
     position:relative;
     float:right;
+    width:45%;
 }
 
 h2.container-label {
     text-align:center;
 }
 
-textarea, textarea:hover {
-    min-width:400px;
+textarea, p#output, textarea:hover {
+    width:100%;
     min-height:215px;
-    max-width:400px;
     max-height:215px;
-    background-color:#000000;
-    color:#00ff00;
+    border:solid;
+    color:#222222;
 }
 
-p#output {
-    min-width:400px;
-    min-height:200px;
-    max-width:400px;
-    max-height:200px;
-    background-color:#000000;
-    color:#00ff00;
-}
 
 p#output, div#interpreter label, #cmd-line {
     margin:0;
