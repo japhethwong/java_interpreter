@@ -147,9 +147,13 @@ def repl():
             print(interrupt)
             exit(0)
         else:
-            classes = read_line(line)
-            for cls in classes:
-                print(eval_class(cls))
+            try:
+                classes = read_line(line)
+            except BaseException as e:
+                print(e)
+            else:
+                for cls in classes:
+                    print(eval_class(cls))
 
 if __name__ == '__main__':
     if len(sys.argv) == 2:

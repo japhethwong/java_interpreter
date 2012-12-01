@@ -423,9 +423,13 @@ def repl():
             print(interrupt)
             exit(0)
         else:
-            result = read_line(line)
-            for stmt in result:
-                print(stmt)
+            try:
+                result = read_line(line)
+            except BaseException as e:
+                print(e)
+            else:
+                for stmt in result:
+                    print(stmt)
 
 def load(path):
     with open(path, 'r') as f:
