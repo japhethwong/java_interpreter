@@ -13,8 +13,8 @@ DELIMS = ('{', '}',
           '(', ')',
           '=', '.',
           ';', ',')
-PS1 = 'Jp> '
-PS2 = '    '
+PS1 = 'compil> '
+PS2 = '        '
 interrupt = '\nExiting compiler'
 
 class Buffer:

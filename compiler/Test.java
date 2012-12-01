@@ -1,12 +1,4 @@
 public class Test {
-    int x;
+    double x = 3.;
 
-
-
-
-
-
-    public int getX() {
-        return x;
-    }
 }

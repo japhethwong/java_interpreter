@@ -22,14 +22,19 @@ from compiler.compile_parse import read_line, read_statement, CLASS, \
 
 from interface.structures import Variable, Method, ClassObj
 
+PS1 = 'Evaler> '
+
 #####################
 # INTERFACE METHODS #
 #####################
 
-def load(src):
+def load_file(src):
     """Loads a .java file into the Java interpreter. This method will
     compile the Java code into a format that is understandable by
     the interpreter.
+
+    ARGUMENTS:
+    src -- a file containing Java code
     
     RAISES:
     IOError        -- if the file at SRC is not found
@@ -39,7 +44,19 @@ def load(src):
         f = open(src, 'r')
     except IOError as e:
         raise IOError('cannot find file {}'.format(src))
-    parsed = read_line(f.read().replace("\n", " "))
+    return load_str(f.read())
+
+def load_str(src):
+    """Loads a string of Java code and compiles it into a format that
+    the interpreter will understand.
+
+    ARGUMENTS:
+    src -- a string of Java code
+
+    RAISES:
+    AssertionError -- if parsed input does not contain classes
+    """
+    parsed = read_line(src.replace('\n', ' '))
     classes = {}
     for cls in parsed:
         assert cls.type == CLASS, 'not a class'
@@ -103,37 +120,6 @@ def eval_method(cls, expr):
         expr['datatype'], expr['args'], expr['body']))
 
 
-###########
-# TESTING #
-###########
-
-def test1():
-    """Test suite 1"""
-    print("----- Test Suite 1 -----")
-    print("-- 1.1 --")
-    b1 = Buffer("class Ex { int x = 3; }")
-    s1 = read_statement(b1)
-    c1 = ClassObj(s1)
-    print(c1)
-
-    print("-- 1.2 --")
-    b2 = Buffer("class Ex { int x = 3; int x; }")
-    s2 = read_statement(b2)
-    try:
-        c2 = ClassObj(s2)
-    except SyntaxError:
-        print("Raised SyntaxError -- passed\n")
-    else:
-        print("Did not raise SyntaxError: " + str(e)) + "\n"
-
-    print("-- 1.3 --")
-    b3 = Buffer("""class Ex { int foo(String x) {}
-                double foo(String x, int y) {}  }""")
-    s3 = read_statement(b3)
-    c3 = ClassObj(s3)
-    print(c3)
-
-
 ################
 # COMMAND LINE #
 ################
@@ -160,7 +146,7 @@ if __name__ == '__main__':
         if sys.argv[1] == '-t':
             test1()
         else:
-            result = load(sys.argv[1])
+            result = load_file(sys.argv[1])
             for key, value in result.items():
                 print(key, value, sep='\n')
     repl()

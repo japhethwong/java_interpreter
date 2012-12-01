@@ -19,6 +19,8 @@ import re
 from compiler.buffer import Buffer, PS1, interrupt
 from interface.exceptions import CompileException
 
+PS1 = "Parser> "
+
 MODIFIERS = ('public', 'protected', 'private')
 CLASS = 'class'
 VARIABLE = 'variable'

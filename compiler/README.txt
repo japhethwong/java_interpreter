@@ -11,7 +11,8 @@ imported from the file compile_eval.py:
 
 *----- CONTENTS -----*
 - Interface
-    - load
+    - load_str
+    - load_file
 - Testing
     - Parser
         - parse_test
@@ -22,11 +23,23 @@ imported from the file compile_eval.py:
     
 
 *----- INTERFACE -----*
-load(src)
+load_str(src)
+    TYPE:       function
+    FUNCTION:   Compiles a string of Java source code
+    INPUT:      The input is string of Java source code
+    OUTPUT:     The output is a dictionary of ClassObj objects.
+    PURPOSE:    Intended to process command line arguments in the Java
+                interpreter, specifically to load Java code
+    ERRORS:     AssertionError -- if parsed input does not contain
+                                  classes
+    NOTES:      None
+
+
+load_file(src)
     TYPE:       function
     FUNCTION:   Compiles a file of Java source code (not limited to 
-                .java
-                files).
+                .java files).
+    INPUT:      The input is the path of a file of Java code
     OUTPUT:     The output is a dictionary of ClassObj objects.
     PURPOSE:    Intended to process command line arguments in the Java
                 interpreter, specifically to load a Java source file.
