@@ -24,7 +24,7 @@ class Variable:
         self.type = datatype
         self.static = static
         self.private = private
-        self.value = None
+        self.value = value
 
     def clone(self):
         var = Variable(self.name, self.type, self.static, self.private)
@@ -161,6 +161,10 @@ class Instance:
                  a method, Instance retrieve it from its parent class.
     Querying and setting variables and methods (no setting) can be
     done using index notation, for convenience.
+
+    All expressions found in variable assignments are evaluated upon
+    instantiation of an Instance, so constructing an Instance object
+    will automatically evaluate those expressions.
     """
     def __init__(self, cls):
         """Constructor.
@@ -172,6 +176,7 @@ class Instance:
         self.instance_attr = {}
         for name, value in cls.instance_attr.items():
             self.instance_attr[name] = value.clone()
+            #TODO evaluate variable assignments
 
     def getattr(self, name):
         """Gets a variable called NAME.

@@ -106,6 +106,15 @@ def validate_name(name):
     """
     if not re.match("[a-zA-Z][\w]*$", name):
         raise CompileException("invalid identifier: '{}'".format(name))
+
+def is_number(token):
+    """Returns True if token can be converted to an int."""
+    try:
+        int(token)
+    except ValueError:
+        return False
+    else:
+        return True
     
 def read_statement(tokens):
     """Reads a complete Java statement and pops it off TOKENS.
@@ -237,7 +246,8 @@ def read_declare(is_private, is_static, datatype, tokens):
         return read_method(is_private, is_static, datatype, 
                            name, tokens)
     elif next_token == '=':
-        result = read_assign(datatype, name, tokens)
+        result = read_assign(is_private, is_static, datatype, name, 
+                            tokens)
         next_token = tokens.pop()
     else:
         result = Statement(VARIABLE, name=name, datatype=datatype, 
@@ -255,7 +265,7 @@ def read_declare(is_private, is_static, datatype, tokens):
     else:
         raise SyntaxError("Unexpected token: {}".format(next_token))
 
-def read_assign(datatype, name, tokens):
+def read_assign(is_private, is_static, datatype, name, tokens):
     """Reads a complete assignment statement.
     
     DESCRIPTION:
@@ -266,7 +276,7 @@ def read_assign(datatype, name, tokens):
     validate_name(name)
     value = read_expr(tokens)
     return Statement(VARIABLE, datatype=datatype, name=name, 
-            value=value)
+            value=value, private=is_private, static=is_static)
 
 def read_expr(tokens):
     """Reads an expression.
@@ -281,9 +291,22 @@ def read_expr(tokens):
     x + y.method(arg)
     Ex(arg)
     """
-    # TODO go until , or ; but don't pop it off
-    
-    pass
+    result = []
+    while tokens.current() != ';' and tokens.current() != ',':
+        next_token = tokens.pop()
+        if result and is_number(result[-1]) and next_token == '.':
+            decimal = tokens.current()
+            if is_number(decimal):
+                result[-1] = result[-1] + next_token + tokens.pop()
+                continue
+            elif decimal == ';' or decimal == ',':
+                result[-1] = result[-1] + next_token
+                break
+            else:
+                raise CompileException("Invalid decimal")
+        result.append(next_token)
+    return " ".join(result)
+
 
 
 def read_method(is_private, is_static, datatype, name, tokens):
@@ -291,7 +314,8 @@ def read_method(is_private, is_static, datatype, name, tokens):
     
     DESCRIPTION:
     A valid method declaration has the following syntax:
-        [modifier] [static] [type] [name] ( [type1] [arg1], ...) { [body] }
+        [modifier] [static] [type] [name] ( [type1] [arg1], ...) 
+            { [body] }
 
     ARGUMENTS:
     is_private -- True if the method is private, False otherwise

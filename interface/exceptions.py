@@ -6,7 +6,7 @@ class JavaException(BaseException):
         self.msg = msg
 
     def __str__(self):
-        return "{}: {}".format(self.type, self.msg)
+        return self.msg
 
 class CompileException(JavaException):
     def __init__(self, msg):
